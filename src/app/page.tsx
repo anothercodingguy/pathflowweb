@@ -18,7 +18,8 @@ import {
   Play,
   UserCheck,
   Key,
-  Moon
+  Moon,
+  Github
 } from 'lucide-react';
 
 export default function Home() {
@@ -52,12 +53,12 @@ export default function Home() {
           </div>
           
           <nav className="hidden md:flex items-center gap-6">
-            <a href="https://pathflow-psi.vercel.app/login" className="text-sm font-medium text-text-2 hover:text-text-1 transition-colors">
+            <a href="https://github.com/anothercodingguy/pathflow" target="_blank" rel="noopener noreferrer" className="text-text-2 hover:text-text-1 transition-colors flex items-center justify-center p-2 rounded-md hover:bg-black/5">
+              <Github className="w-5 h-5" />
+            </a>
+            <a href="https://pathflow-psi.vercel.app/login" className="btn-primary rounded-md px-4 py-2 text-sm tracking-wide text-center">
               Sign In
             </a>
-            <button className="btn-primary rounded-md px-4 py-2 text-sm tracking-wide">
-              Start Building
-            </button>
           </nav>
         </div>
       </header>
@@ -441,42 +442,10 @@ export default function Home() {
       </main>
 
       <footer className="py-16 bg-surface-2 border-t border-border">
-        <div className="bw-container grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-          <div>
-            <h4 className="font-bold text-text-1 mb-4">Product</h4>
-            <ul className="space-y-3 text-sm text-text-2">
-              <li><a href="#" className="hover:text-text-1">Features</a></li>
-              <li><a href="#" className="hover:text-text-1">Integrations</a></li>
-              <li><a href="#" className="hover:text-text-1">Pricing</a></li>
-              <li><a href="#" className="hover:text-text-1">Changelog</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold text-text-1 mb-4">Resources</h4>
-            <ul className="space-y-3 text-sm text-text-2">
-              <li><a href="#" className="hover:text-text-1">Documentation</a></li>
-              <li><a href="#" className="hover:text-text-1">API Reference</a></li>
-              <li><a href="#" className="hover:text-text-1">Blog</a></li>
-              <li><a href="#" className="hover:text-text-1">Community</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold text-text-1 mb-4">Company</h4>
-            <ul className="space-y-3 text-sm text-text-2">
-              <li><a href="#" className="hover:text-text-1">About</a></li>
-              <li><a href="#" className="hover:text-text-1">Customers</a></li>
-              <li><a href="#" className="hover:text-text-1">Careers</a></li>
-              <li><a href="#" className="hover:text-text-1">Contact</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold text-text-1 mb-4">Legal</h4>
-            <ul className="space-y-3 text-sm text-text-2">
-              <li><a href="#" className="hover:text-text-1">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-text-1">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-text-1">Security</a></li>
-            </ul>
-          </div>
+        <div className="bw-container flex justify-center items-center py-12 md:py-24 overflow-hidden">
+          <h1 className="text-[16vw] leading-none font-black tracking-tighter uppercase font-sans text-text-3 hover:text-text-1 hover:scale-105 hover:-translate-y-4 hover:-rotate-1 transition-all duration-700 ease-out cursor-default select-none group">
+            PATH<span className="text-accent/60 group-hover:text-accent transition-colors duration-700">FLOW</span>
+          </h1>
         </div>
         <div className="bw-container flex flex-col md:flex-row items-center justify-between pt-8 border-t border-border">
           <span className="font-extrabold tracking-tight text-text-1 text-lg uppercase font-sans">
