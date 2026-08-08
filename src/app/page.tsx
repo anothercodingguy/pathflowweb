@@ -15,7 +15,10 @@ import {
   Cpu,
   CheckCircle2,
   AlertTriangle,
-  Play
+  Play,
+  UserCheck,
+  Key,
+  Moon
 } from 'lucide-react';
 
 export default function Home() {
@@ -48,7 +51,10 @@ export default function Home() {
             </span>
           </div>
           
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-6">
+            <a href="https://pathflow-psi.vercel.app/login" className="text-sm font-medium text-text-2 hover:text-text-1 transition-colors">
+              Sign In
+            </a>
             <button className="btn-primary rounded-md px-4 py-2 text-sm tracking-wide">
               Start Building
             </button>
@@ -357,6 +363,55 @@ export default function Home() {
                 </div>
               </div>
 
+            </div>
+          </div>
+        </section>
+
+        {/* Developer Experience Features */}
+        <section className="py-24 border-b border-border bg-surface">
+          <div className="bw-container">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <h2 className="text-3xl md:text-4xl font-medium tracking-tight text-text-1 mb-4">
+                Designed for Developer Productivity
+              </h2>
+              <p className="text-lg text-text-2">
+                Everything you need to manage your AI infrastructure, securely and efficiently.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Feature 1: OAuth */}
+              <div className="bg-surface-2 border border-border rounded-2xl p-8 hover:-translate-y-1 transition-transform shadow-sm group">
+                <div className="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300">
+                  <UserCheck className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-medium text-text-1 mb-3">Secure OAuth Login</h3>
+                <p className="text-text-2 leading-relaxed">
+                  Enterprise-grade security out of the box. Authenticate your entire team seamlessly with Google Cloud OAuth integration.
+                </p>
+              </div>
+
+              {/* Feature 2: Settings & API Keys */}
+              <div className="bg-surface-2 border border-border rounded-2xl p-8 hover:-translate-y-1 transition-transform shadow-sm group">
+                <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
+                  <Key className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-medium text-text-1 mb-3">Workspace Management</h3>
+                <p className="text-text-2 leading-relaxed">
+                  Manage API secret keys, configure ingestion endpoints, and define default project environments all from a centralized settings dashboard.
+                </p>
+              </div>
+
+              {/* Feature 3: Customization */}
+              <div className="bg-surface-2 border border-border rounded-2xl p-8 hover:-translate-y-1 transition-transform shadow-sm group">
+                <div className="w-12 h-12 bg-amber-500/10 text-amber-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-amber-500 group-hover:text-white transition-all duration-300">
+                  <Moon className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-medium text-text-1 mb-3">Customizable UI</h3>
+                <p className="text-text-2 leading-relaxed">
+                  Toggle between sleek dark and light DevTools themes, and view token costs in your preferred local currency (USD/INR).
+                </p>
+              </div>
             </div>
           </div>
         </section>
