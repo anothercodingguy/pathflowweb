@@ -1332,7 +1332,7 @@ def process_checkout(user_id, cart):
         {/* ========================================================================= */}
         
         {/* ========================================================================= */}
-        {/* PRICING (INR PRICING POWERED BY PHONEPE)                                  */}
+        {/* PRICING (INR PRICING POWERED BY RAZORPAY)                                 */}
         {/* ========================================================================= */}
         <section id="pricing" className="py-24 border-b border-border bg-surface-subtle">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
