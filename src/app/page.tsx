@@ -4,8 +4,6 @@ import React, { useState, useEffect } from "react";
 import ProductScreenshot from "@/components/ProductScreenshot";
 import { PLANS } from "@/lib/plans";
 import { 
-  Sparkles,
-  CreditCard,
   ArrowRight, 
   ArrowDown, 
   Check, 
@@ -276,11 +274,7 @@ export default function HomePage() {
         <section className="pt-32 md:pt-40 pb-20 border-b border-border bg-surface">
           <div className="bw-container flex flex-col items-center text-center">
             
-            {/* Category Tag */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-mono uppercase font-semibold mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-              <span>Production Observability & Debugging</span>
-            </div>
+
 
             {/* Main Headline */}
             <h1 className="max-w-4xl text-balance text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] font-semibold leading-[1.08] tracking-tight text-text-1">
@@ -500,10 +494,7 @@ export default function HomePage() {
         <section id="screenshots" className="py-24 border-b border-border bg-[#07070A] text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-12">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono text-blue-400 mb-4 font-semibold">
-                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                <span>Production Application UI</span>
-              </div>
+
               <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
                 Real engineering tooling for production agents.
               </h2>
@@ -786,9 +777,7 @@ export default function HomePage() {
         <section id="how-it-works" className="py-24 border-b border-border bg-surface-subtle">
           <div className="bw-container">
             <div className="text-center max-w-2xl mx-auto mb-16">
-              <div className="inline-flex items-center gap-1.5 text-xs font-mono uppercase font-semibold text-accent mb-2">
-                <span>The Workflow</span>
-              </div>
+
               <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-text-1">
                 From production failure to root cause.
               </h2>
@@ -889,9 +878,7 @@ export default function HomePage() {
         <section className="py-24 border-b border-border bg-surface">
           <div className="bw-container">
             <div className="max-w-3xl mb-12">
-              <div className="inline-flex items-center gap-1.5 text-xs font-mono uppercase font-semibold text-accent mb-2">
-                <span>Interactive Demo</span>
-              </div>
+
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-text-1">
                 See what happened, not just that it failed.
               </h2>
@@ -1049,9 +1036,7 @@ export default function HomePage() {
         <section id="capabilities" className="py-24 border-b border-border bg-surface-subtle">
           <div className="bw-container">
             <div className="max-w-3xl mb-16">
-              <div className="inline-flex items-center gap-1.5 text-xs font-mono uppercase font-semibold text-accent mb-2">
-                <span>Capabilities</span>
-              </div>
+
               <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-text-1">
                 Engineered for rapid production diagnosis.
               </h2>
@@ -1170,9 +1155,7 @@ export default function HomePage() {
             <div className="grid lg:grid-cols-[400px_1fr] gap-12 items-center">
               
               <div className="space-y-4">
-                <div className="inline-flex items-center gap-1.5 text-xs font-mono uppercase font-semibold text-accent">
-                  <span>Integration</span>
-                </div>
+
                 <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-text-1">
                   Works with the systems your team already runs.
                 </h2>
@@ -1234,9 +1217,7 @@ def process_checkout(user_id, cart):
         <section id="why-pathflow" className="py-24 border-b border-border bg-surface-subtle">
           <div className="bw-container">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <div className="inline-flex items-center gap-1.5 text-xs font-mono uppercase font-semibold text-accent mb-2">
-                <span>Comparison</span>
-              </div>
+
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-text-1">
                 Observability tells you something is wrong.<br />PathFlow helps you debug why.
               </h2>
@@ -1291,9 +1272,7 @@ def process_checkout(user_id, cart):
         <section className="py-24 border-b border-border bg-surface">
           <div className="bw-container">
             <div className="max-w-2xl mb-16">
-              <div className="inline-flex items-center gap-1.5 text-xs font-mono uppercase font-semibold text-accent mb-2">
-                <span>Who It Is For</span>
-              </div>
+
               <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-text-1">
                 Built for the people who own production.
               </h2>
@@ -1358,10 +1337,7 @@ def process_checkout(user_id, cart):
         <section id="pricing" className="py-24 border-b border-border bg-surface-subtle">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono text-accent mb-4 font-semibold">
-                <CreditCard className="w-3.5 h-3.5" />
-                <span>Transparent INR Pricing</span>
-              </div>
+
               <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-text-1">
                 Simple, transparent plans in Indian Rupees.
               </h2>
