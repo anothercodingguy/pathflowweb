@@ -24,13 +24,13 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
-  title: "PathFlow — AI-Powered Production Debugging",
+  title: "PathFlow — Production Observability & Debugging",
   description: "PathFlow helps developers investigate production failures, trace execution paths, find root causes with evidence, and get to fixes faster.",
   alternates: {
     canonical: "https://thepathflow.online",
   },
   openGraph: {
-    title: "PathFlow — AI-Powered Production Debugging",
+    title: "PathFlow — Production Observability & Debugging",
     description: "Investigate production errors, trace execution paths, isolate root causes with evidence, and get to fixes faster.",
     url: "https://thepathflow.online",
     siteName: "PathFlow",
@@ -39,8 +39,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "PathFlow — AI-Powered Production Debugging",
-    description: "Your AI debugger for production. Trace execution paths and find root causes faster.",
+    title: "PathFlow — Production Observability & Debugging",
+    description: "Investigate production errors and trace execution paths. Trace execution paths and find root causes faster.",
   },
   icons: {
     icon: "/favicon.ico",

@@ -279,12 +279,12 @@ export default function HomePage() {
             {/* Category Tag */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-mono uppercase font-semibold mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-              <span>AI-Powered Production Debugging</span>
+              <span>Production Observability & Debugging</span>
             </div>
 
             {/* Main Headline */}
             <h1 className="max-w-4xl text-balance text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] font-semibold leading-[1.08] tracking-tight text-text-1">
-              Debug production failures with AI.
+              Debug production failures with confidence.
             </h1>
             
             {/* Supporting Explanation */}
@@ -521,7 +521,7 @@ export default function HomePage() {
                       : "text-zinc-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  📊 Runs Dashboard
+                  Runs Dashboard
                 </button>
                 <button
                   onClick={() => setActiveScreenshotTab("trace")}
@@ -531,7 +531,7 @@ export default function HomePage() {
                       : "text-zinc-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  🔍 Trace Waterfall
+                  Trace Waterfall
                 </button>
                 <button
                   onClick={() => setActiveScreenshotTab("failure")}
@@ -541,7 +541,7 @@ export default function HomePage() {
                       : "text-zinc-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  🚨 Incident Failure
+                  Incident Failure
                 </button>
                 <button
                   onClick={() => setActiveScreenshotTab("investigation")}
@@ -551,7 +551,7 @@ export default function HomePage() {
                       : "text-zinc-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  🤖 AI Root Cause
+                  Root Cause
                 </button>
                 <button
                   onClick={() => setActiveScreenshotTab("billing")}
@@ -561,7 +561,7 @@ export default function HomePage() {
                       : "text-zinc-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  ⚡ PhonePe Billing
+                  Billing & Plans
                 </button>
                 <button
                   onClick={() => setActiveScreenshotTab("settings")}
@@ -571,7 +571,7 @@ export default function HomePage() {
                       : "text-zinc-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  ⚙️ SDK Setup
+                  SDK Setup
                 </button>
               </div>
             </div>
@@ -615,10 +615,10 @@ export default function HomePage() {
               {activeScreenshotTab === "investigation" && (
                 <ProductScreenshot
                   src="/screenshots/screenshot_investigation.png"
-                  alt="PathFlow Automated AI Root Cause Analysis"
+                  alt="PathFlow Root Cause Diagnosis"
                   title="Verifiable Root Cause Diagnosis with Evidence"
                   caption="Isolate root causes with 87%+ confidence. PathFlow correlates spans, failure tags, and code diffs to output concrete code remediations."
-                  badge="AI Root Cause"
+                  badge="Root Cause Diagnosis"
                   urlPath="/app/runs/path-3?tab=investigation"
                 />
               )}
@@ -626,10 +626,10 @@ export default function HomePage() {
               {activeScreenshotTab === "billing" && (
                 <ProductScreenshot
                   src="/screenshots/screenshot_billing.png"
-                  alt="PathFlow PhonePe Payment Gateway Subscriptions"
-                  title="PhonePe Payment Gateway Standard Checkout"
-                  caption="Transparent one-time monthly subscriptions in Indian Rupees (INR). Select Pro or Team tier and complete checkout seamlessly via PhonePe."
-                  badge="PhonePe Standard Checkout"
+                  alt="PathFlow Subscription & Billing Management"
+                  title="Subscription & Plan Management"
+                  caption="Transparent monthly subscriptions in Indian Rupees (INR). Select Pro or Team tier and manage billing seamlessly."
+                  badge="Billing & Plans"
                   urlPath="/app/settings/billing"
                 />
               )}
@@ -934,11 +934,11 @@ export default function HomePage() {
                 </div>
 
                 <div className="flex items-center gap-3 text-xs font-mono">
-                  <span className="px-2.5 py-1 rounded-md bg-white border border-border text-text-2">
-                    ⏱ {currentScenario.duration}
+                  <span className="px-2.5 py-1 rounded-md bg-white border border-border text-text-2 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-text-3" /> {currentScenario.duration}
                   </span>
-                  <span className="px-2.5 py-1 rounded-md bg-white border border-border text-text-2">
-                    💰 {currentScenario.cost}
+                  <span className="px-2.5 py-1 rounded-md bg-white border border-border text-text-2 flex items-center gap-1.5">
+                    <DollarSign className="w-3.5 h-3.5 text-text-3" /> {currentScenario.cost}
                   </span>
                 </div>
               </div>
@@ -1250,7 +1250,7 @@ def process_checkout(user_id, cart):
               <div className="grid grid-cols-2 text-xs font-mono font-bold uppercase tracking-wider border-b border-border bg-surface-2 p-4">
                 <span className="text-text-3">Traditional Observability</span>
                 <span className="text-accent flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5" /> PathFlow AI Debugger
+                  <Zap className="w-3.5 h-3.5" /> PathFlow Debugger
                 </span>
               </div>
 
@@ -1366,7 +1366,7 @@ def process_checkout(user_id, cart):
                 Simple, transparent plans in Indian Rupees.
               </h2>
               <p className="mt-3 text-base text-text-2">
-                Start free for personal prototypes. Upgrade seamlessly with PhonePe Payment Gateway Standard Checkout.
+                Start free for personal prototypes. Upgrade seamlessly as your team scales.
               </p>
             </div>
 
@@ -1421,16 +1421,13 @@ def process_checkout(user_id, cart):
                     ))}
                   </ul>
                 </div>
-                <div className="mt-8 space-y-2">
+                <div className="mt-8">
                   <a 
                     href={appUrl + "/login?callbackUrl=%2Fsettings%2Fbilling%3Fplan%3Dpro"} 
                     className="btn-primary bg-blue-600 hover:bg-blue-500 text-white w-full py-2.5 text-xs font-semibold shadow-lg shadow-blue-500/20 text-center block"
                   >
                     {PLANS.PRO.ctaText}
                   </a>
-                  <div className="text-[10px] text-center font-mono text-zinc-400 flex items-center justify-center gap-1">
-                    <span>⚡ Instant PhonePe Checkout</span>
-                  </div>
                 </div>
               </div>
 
@@ -1453,16 +1450,13 @@ def process_checkout(user_id, cart):
                     ))}
                   </ul>
                 </div>
-                <div className="mt-8 space-y-2">
-                  <a 
-                    href={appUrl + "/login?callbackUrl=%2Fsettings%2Fbilling%3Fplan%3Dteam"} 
-                    className="btn-secondary w-full py-2.5 text-xs font-semibold text-center block"
+                <div className="mt-8">
+                  <button 
+                    disabled
+                    className="btn-secondary w-full py-2.5 text-xs font-semibold text-center block opacity-70 cursor-not-allowed bg-surface-2 text-text-3 border-border"
                   >
                     {PLANS.TEAM.ctaText}
-                  </a>
-                  <div className="text-[10px] text-center font-mono text-zinc-500 flex items-center justify-center gap-1">
-                    <span>⚡ Instant PhonePe Checkout</span>
-                  </div>
+                  </button>
                 </div>
               </div>
 
@@ -1486,40 +1480,17 @@ def process_checkout(user_id, cart):
                   </ul>
                 </div>
                 <div className="mt-8">
-                  <a href={PLANS.ENTERPRISE.ctaHref} className="btn-secondary w-full py-2.5 text-xs font-semibold text-center block">
+                  <button 
+                    disabled
+                    className="btn-secondary w-full py-2.5 text-xs font-semibold text-center block opacity-70 cursor-not-allowed bg-surface-2 text-text-3 border-border"
+                  >
                     {PLANS.ENTERPRISE.ctaText}
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Honest Billing & PhonePe Trust Guarantee Card */}
-            <div className="mt-12 p-5 rounded-xl border border-border bg-white flex flex-col sm:flex-row items-center justify-between gap-4 max-w-4xl mx-auto shadow-xs">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0">
-                  <CreditCard className="h-5 w-5 text-purple-600" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-text-1 flex items-center gap-2">
-                    <span>Powered by Official PhonePe Payment Gateway Standard Checkout</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-700 font-bold border border-purple-500/20">
-                      INR
-                    </span>
-                  </h4>
-                  <p className="text-xs text-text-2 mt-0.5">
-                    Transparent one-time monthly payments in INR with manual renewal reminders. No silent automated recurring debit without your explicit authorization.
-                  </p>
-                </div>
-              </div>
-
-              <a
-                href={appUrl + "/settings/billing"}
-                className="text-xs font-mono text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-1 whitespace-nowrap"
-              >
-                <span>View Billing Settings</span>
-                <ArrowRight className="h-3 w-3" />
-              </a>
-            </div>
+            
           </div>
         </section>
 
@@ -1565,7 +1536,7 @@ def process_checkout(user_id, cart):
                 PATH<span className="text-accent">FLOW</span>
               </span>
               <p className="text-text-2 text-xs leading-relaxed max-w-xs">
-                AI-powered production debugging for software engineering teams.
+                Production observability and debugging for software engineering teams.
               </p>
             </div>
 
