@@ -61,7 +61,7 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    const appTarget = process.env.PATHFLOW_APP_TARGET_URL || "https://thepathflow.vercel.app";
+    const appTarget = process.env.PATHFLOW_APP_TARGET_URL || "https://pathflow-psi.vercel.app";
     return [
       {
         source: "/app",

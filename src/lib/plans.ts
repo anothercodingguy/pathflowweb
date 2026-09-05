@@ -75,8 +75,8 @@ export const PLANS: Record<string, PlanConfig> = {
       "Custom Alerting Thresholds",
       "Dedicated Slack Channel Support",
     ],
-    ctaText: "Coming Soon",
-    ctaHref: "#pricing",
+    ctaText: "Upgrade to Team →",
+    ctaHref: "/app/login?callbackUrl=%2Fsettings%2Fbilling%3Fplan%3Dteam",
     highlighted: false,
   },
   ENTERPRISE: {

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { Maximize2, X, ExternalLink, ShieldCheck } from "lucide-react";
 
 interface ProductScreenshotProps {
@@ -63,6 +62,7 @@ export default function ProductScreenshot({
           onClick={() => setIsOpen(true)}
           className="relative cursor-pointer overflow-hidden bg-black/60 aspect-[16/10] sm:aspect-[16/9.5]"
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={src}
             alt={alt}
@@ -119,6 +119,7 @@ export default function ProductScreenshot({
               </button>
             </div>
             <div className="max-h-[80vh] overflow-auto p-2 bg-black">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={src} alt={alt} className="w-full h-auto rounded-lg" />
             </div>
             <div className="px-5 py-3 bg-[#101014] border-t border-white/10 flex items-center justify-between text-xs text-zinc-400">

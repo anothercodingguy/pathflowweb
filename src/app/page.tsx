@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import ProductScreenshot from "@/components/ProductScreenshot";
 import { PLANS } from "@/lib/plans";
 import { 
@@ -147,14 +148,14 @@ export default function HomePage() {
         <div className="bw-container flex items-center justify-between">
           
           {/* Brand Logo */}
-          <a href="/" className="flex items-center gap-2.5 group">
+          <Link href="/" className="flex items-center gap-2.5 group">
             <span className="font-extrabold tracking-tight text-text-1 text-lg uppercase font-sans flex items-center gap-0.5">
               PATH<span className="text-accent">FLOW</span>
             </span>
             <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-surface-2 text-text-2 border border-border">
               v1.0
             </span>
-          </a>
+          </Link>
           
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-text-2">
@@ -350,7 +351,7 @@ export default function HomePage() {
                       <span>/api/checkout/process</span>
                     </div>
                     <div className="text-xs text-red-400 font-mono mt-1">
-                      TypeError: Cannot read properties of null (reading 'customer_id')
+                      TypeError: Cannot read properties of null (reading &apos;customer_id&apos;)
                     </div>
                   </div>
 
