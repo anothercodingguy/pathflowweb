@@ -84,9 +84,7 @@ export default function ProductScreenshot({
               <p className="text-xs text-zinc-400 mt-0.5 leading-relaxed">{caption}</p>
             </div>
             <a
-              href="https://thepathflow.online/app/runs/path-1"
-              target="_blank"
-              rel="noopener noreferrer"
+              href={urlPath.startsWith('/app') ? urlPath : `/app${urlPath}`}
               className="inline-flex items-center gap-1 text-xs font-mono text-blue-400 hover:text-blue-300 transition-colors whitespace-nowrap self-start sm:self-center"
             >
               <span>Explore Interactive Run</span>
@@ -125,9 +123,7 @@ export default function ProductScreenshot({
             <div className="px-5 py-3 bg-[#101014] border-t border-white/10 flex items-center justify-between text-xs text-zinc-400">
               <span>{caption}</span>
               <a
-                href="https://thepathflow.online/app"
-                target="_blank"
-                rel="noopener noreferrer"
+                href={urlPath.startsWith('/app') ? urlPath : `/app${urlPath}`}
                 className="text-blue-400 hover:underline font-mono"
               >
                 Open live app →

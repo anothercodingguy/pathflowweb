@@ -165,6 +165,7 @@ export default function HomePage() {
             <a href="#capabilities" className="hover:text-text-1 transition-colors">Capabilities</a>
             <a href="#why-pathflow" className="hover:text-text-1 transition-colors">Comparison</a>
             <a href="#pricing" className="hover:text-text-1 transition-colors">Pricing</a>
+            <a href="https://github.com/anothercodingguy/pathflow#readme" target="_blank" rel="noopener noreferrer" className="hover:text-text-1 transition-colors">Docs</a>
           </nav>
 
           {/* Desktop Actions */}
@@ -246,6 +247,15 @@ export default function HomePage() {
                 Pricing
               </a>
               <a 
+                href="https://github.com/anothercodingguy/pathflow#readme" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-1.5 hover:text-accent transition-colors"
+              >
+                Documentation
+              </a>
+              <a 
                 href="https://github.com/anothercodingguy/pathflow" 
                 target="_blank" 
                 rel="noopener noreferrer" 
@@ -305,7 +315,7 @@ export default function HomePage() {
 
             {/* Zero Friction Line */}
             <div className="mt-6 flex items-center justify-center gap-6 text-xs text-text-3 font-mono">
-              <span>✓ No credit card required</span>
+              <span className="inline-flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-accent" /> No credit card required</span>
               <span className="hidden sm:inline">·</span>
               <span className="hidden sm:inline">Connects via Python SDK, REST API, or OpenTelemetry</span>
             </div>
@@ -1428,12 +1438,12 @@ def process_checkout(user_id, cart):
                   </ul>
                 </div>
                 <div className="mt-8">
-                  <button 
-                    disabled
-                    className="btn-secondary w-full py-2.5 text-xs font-semibold text-center block opacity-70 cursor-not-allowed bg-surface-2 text-text-3 border-border"
+                  <a 
+                    href={appUrl + "/login?callbackUrl=%2Fsettings%2Fbilling%3Fplan%3Dteam"}
+                    className="btn-secondary w-full py-2.5 text-xs font-semibold text-center block hover:border-zinc-400 hover:text-text-1 transition-colors"
                   >
                     {PLANS.TEAM.ctaText}
-                  </button>
+                  </a>
                 </div>
               </div>
 
@@ -1457,12 +1467,12 @@ def process_checkout(user_id, cart):
                   </ul>
                 </div>
                 <div className="mt-8">
-                  <button 
-                    disabled
-                    className="btn-secondary w-full py-2.5 text-xs font-semibold text-center block opacity-70 cursor-not-allowed bg-surface-2 text-text-3 border-border"
+                  <a 
+                    href="mailto:enterprise@thepathflow.online?subject=PathFlow%20Enterprise%20Inquiry%20%E2%80%94%20Custom%20Volume%20%26%20VPC"
+                    className="btn-secondary w-full py-2.5 text-xs font-semibold text-center block hover:border-zinc-400 hover:text-text-1 transition-colors"
                   >
-                    {PLANS.ENTERPRISE.ctaText}
-                  </button>
+                    Contact Enterprise →
+                  </a>
                 </div>
               </div>
             </div>
