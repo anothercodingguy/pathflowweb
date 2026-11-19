@@ -12,22 +12,38 @@
   --color-border-hover: #D4D4CE;
   --color-text-1: #09090B;
   --color-text-2: #52525B;
-  --color-text-3: #71717A;
+  --color-text-3: #63636B;
   --color-text-4: #A1A1AA;
   --color-primary: #09090B;
   --color-primary-hover: #18181B;
   --color-accent: #2563EB;
   --color-accent-hover: #1D4ED8;
   --color-accent-subtle: #EFF6FF;
-  --color-success: #16A34A;
+  --color-success: #15803D;
   --color-success-subtle: #F0FDF4;
-  --color-warning: #D97706;
+  --color-warning: #B45309;
   --color-warning-subtle: #FFFBEB;
-  --color-error: #DC2626;
+  --color-error: #B91C1C;
   --color-error-subtle: #FEF2F2;
   
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", "SF Mono", Menlo, Monaco, Consolas, monospace;
+
+  /* Dark "product window" surfaces (the mock app panels and screenshot frames). */
+  --color-ink: #07070A;
+  --color-panel: #0C0C0F;
+  --color-panel-2: #101014;
+  --color-panel-3: #141418;
+}
+
+/*
+  Fonts. layout.tsx loads Geist + Geist Mono with next/font, which exposes them
+  as the CSS variables --font-geist-sans / --font-geist-mono on <html>.
+  Pointing Tailwind's --font-sans / --font-mono at those variables is what makes
+  `font-sans`, `font-mono` and the page default actually use the loaded files.
+  `inline` is required because the value is itself a var() set on an element.
+*/
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 :root {
@@ -37,6 +53,13 @@
 
 html {
   scroll-behavior: smooth;
+  /* Keep in-page anchors (#pricing etc.) clear of the fixed header. */
+  scroll-padding-top: 5rem;
+}
+
+/* Stop the page scrolling behind an open screenshot lightbox. */
+html:has(dialog[open]) {
+  overflow: hidden;
 }
 
 body {
@@ -47,98 +70,92 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Utilities */
-.glass-nav {
-  background: rgba(250, 250, 249, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
+/*
+  Component classes.
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--color-border);
-}
-
-/* Primary Button */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background-color: var(--color-primary);
-  color: #FFFFFF;
-  padding: 0.625rem 1.25rem;
-  border-radius: 0.625rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.15s ease-in-out;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-}
-
-.btn-primary:hover {
-  background-color: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-/* Secondary Button */
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background-color: #FFFFFF;
-  color: var(--color-text-1);
-  border: 1px solid var(--color-border);
-  padding: 0.625rem 1.25rem;
-  border-radius: 0.625rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.15s ease-in-out;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.btn-secondary:hover {
-  background-color: #F4F4F1;
-  border-color: var(--color-border-hover);
-  transform: translateY(-1px);
-}
-
-.btn-secondary:active {
-  transform: translateY(0);
-}
-
-/* Container */
-.bw-container {
-  max-width: 1160px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-}
-
-@media (max-width: 640px) {
-  .bw-container {
-    padding-left: 1rem;
-    padding-right: 1rem;
+  These live in Tailwind's `components` layer on purpose. CSS written outside
+  any layer always beats Tailwind's utility classes, which meant
+  `className="btn-primary px-6 py-3 bg-blue-600"` silently ignored the padding
+  and colour. Inside `@layer components`, utilities on the same element win, so
+  a class sets the default and the markup can still adjust it.
+*/
+@layer components {
+  .glass-nav {
+    background: rgba(250, 250, 249, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
-}
 
-/* Typography Helpers */
-.text-balance {
-  text-wrap: balance;
-}
+  /* Primary Button */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
 
-.text-pretty {
-  text-wrap: pretty;
+  .btn-primary:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: var(--color-surface);
+    color: var(--color-text-1);
+    border: 1px solid var(--color-border);
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-surface-subtle);
+    border-color: var(--color-border-hover);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary:active {
+    transform: translateY(0);
+  }
+
+  /* Container: the one page-width wrapper every section uses. */
+  .bw-container {
+    width: 100%;
+    max-width: 1160px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  @media (max-width: 640px) {
+    .bw-container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
 }
 
 /* Code styling */
@@ -150,6 +167,53 @@ code, pre {
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+/* On the dark product panels the accent blue is too dim to see; use a lighter ring. */
+.on-dark :focus-visible,
+.on-dark:focus-visible {
+  outline-color: #93C5FD;
+}
+
+/* Skip link: first Tab stop, only visible while focused. */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 60;
+  transform: translateY(-200%);
+  background: var(--color-primary);
+  color: #FFFFFF;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Screenshot lightbox (native <dialog>) */
+.lightbox::backdrop {
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.lightbox[open] {
+  animation: lightbox-in 0.18s ease-out;
+}
+
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Reduced motion preference */
