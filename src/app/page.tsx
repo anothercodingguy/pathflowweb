@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
+import React, { useState } from "react";
 import ProductScreenshot from "@/components/ProductScreenshot";
+import SiteHeader from "@/components/SiteHeader";
+import { TabList, tabPanelProps } from "@/components/Tabs";
 import { PLANS } from "@/lib/plans";
 import { 
   ArrowRight, 
@@ -20,30 +21,118 @@ import {
   Zap, 
   FileCode, 
   ExternalLink, 
-  Menu, 
-  X, 
   Clock, 
   DollarSign, 
   Server, 
   Split
 } from "lucide-react";
 
-export default function HomePage() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeHeroTab, setActiveHeroTab] = useState<"trace" | "rootcause" | "patch">("trace");
-  const [activeScenario, setActiveScenario] = useState<number>(0);
-  const [activeDemoTab, setActiveDemoTab] = useState<"timeline" | "evidence" | "fix">("timeline");
-  const [copiedSdk, setCopiedSdk] = useState(false);
-  const [activeScreenshotTab, setActiveScreenshotTab] = useState<"dashboard" | "trace" | "failure" | "investigation" | "billing" | "settings">("dashboard");
+type HeroTab = "trace" | "rootcause" | "patch";
+type DemoTab = "timeline" | "evidence" | "fix";
+type ScreenshotTab = "dashboard" | "trace" | "failure" | "investigation" | "billing" | "settings";
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+// Tabs of the dark "Investigation" window in the hero.
+const HERO_TABS: { value: HeroTab; label: string }[] = [
+  { value: "trace", label: "Execution Trace" },
+  { value: "rootcause", label: "Root Cause" },
+  { value: "patch", label: "Suggested Patch" },
+];
+
+// One entry per tab in the Screenshots section. The tab row and the picture
+// shown under it are both rendered from this list, so they cannot drift apart.
+const SCREENSHOTS: {
+  value: ScreenshotTab;
+  label: string;
+  src: string;
+  alt: string;
+  title: string;
+  caption: string;
+  badge: string;
+  urlPath: string;
+}[] = [
+  {
+    value: "dashboard",
+    label: "Runs Dashboard",
+    src: "/screenshots/screenshot_dashboard.png",
+    alt: "PathFlow Production Runs Dashboard",
+    title: "Real-Time Execution Runs & Token Economics",
+    caption: "See every production execution in one place. Monitor status, model family, duration, token usage, and quality scores at a glance.",
+    badge: "Runs Dashboard",
+    urlPath: "/app/runs",
+  },
+  {
+    value: "trace",
+    label: "Trace Waterfall",
+    src: "/screenshots/screenshot_trace.png",
+    alt: "PathFlow Interactive Trace Waterfall",
+    title: "Interactive Trace Waterfall & Span Hierarchy",
+    caption: "Follow the execution path step by step. Inspect child spans, tool invocations, prompts, token breakdowns, and latency bottlenecks.",
+    badge: "Trace Waterfall",
+    urlPath: "/app/runs/path-1",
+  },
+  {
+    value: "failure",
+    label: "Incident Failure",
+    src: "/screenshots/screenshot_failure.png",
+    alt: "PathFlow Production Incident Failure Diagnostics",
+    title: "Pinpoint Failure Points & Retry Loops",
+    caption: "See where things actually went wrong. Isolate 429 rate limits, bad tool schemas, and unclosed event loop leaks instantly.",
+    badge: "Incident Diagnostics",
+    urlPath: "/app/runs/path-3",
+  },
+  {
+    value: "investigation",
+    label: "Root Cause",
+    src: "/screenshots/screenshot_investigation.png",
+    alt: "PathFlow Root Cause Diagnosis",
+    title: "Verifiable Root Cause Diagnosis with Evidence",
+    caption: "Isolate root causes with 87%+ confidence. PathFlow correlates spans, failure tags, and code diffs to output concrete code remediations.",
+    badge: "Root Cause Diagnosis",
+    urlPath: "/app/runs/path-3?tab=investigation",
+  },
+  {
+    value: "billing",
+    label: "Billing & Plans",
+    src: "/screenshots/screenshot_billing.png",
+    alt: "PathFlow Subscription & Billing Management",
+    title: "Subscription & Plan Management",
+    caption: "Transparent monthly subscriptions in Indian Rupees (INR). Select Pro or Team tier and manage billing seamlessly.",
+    badge: "Billing & Plans",
+    urlPath: "/app/settings/billing",
+  },
+  {
+    value: "settings",
+    label: "SDK Setup",
+    src: "/screenshots/screenshot_settings.png",
+    alt: "PathFlow SDK Telemetry & Ingestion Settings",
+    title: "Zero-Friction Ingestion & API Keys",
+    caption: "Connect PathFlow to the way your team already works. Export PATHFLOW_API_KEY and wrap your agent in 2 lines of Python code.",
+    badge: "SDK & Ingestion",
+    urlPath: "/app/settings",
+  },
+];
+
+// The code sample in the Integrations section. Shown on the page and copied by
+// the Copy button, so what you see is exactly what you get.
+const SDK_SNIPPET = `import pathflow
+
+# 1. Initialize PathFlow client
+pathflow.init(
+    api_key="pf_live_secret_key",
+    endpoint="https://thepathflow.online/app/api/v1"
+)
+
+# 2. Trace critical execution paths automatically
+@pathflow.trace()
+def process_checkout(user_id, cart):
+    return billing_service.charge(user_id, cart)`;
+
+export default function HomePage() {
+  const [activeHeroTab, setActiveHeroTab] = useState<HeroTab>("trace");
+  const [activeScenario, setActiveScenario] = useState<number>(0);
+  const [activeDemoTab, setActiveDemoTab] = useState<DemoTab>("timeline");
+  const [copiedSdk, setCopiedSdk] = useState(false);
+  const [activeScreenshotTab, setActiveScreenshotTab] = useState<ScreenshotTab>("dashboard");
 
   const handleCopyCode = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -137,147 +226,17 @@ export default function HomePage() {
   ];
 
   const currentScenario = scenarios[activeScenario];
+  const currentScreenshot = SCREENSHOTS.find((shot) => shot.value === activeScreenshotTab) ?? SCREENSHOTS[0];
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground selection:bg-black/10 flex flex-col">
       
       {/* ========================================================================= */}
-      {/* 1. NAVIGATION BAR */}
+      {/* 1. NAVIGATION BAR (src/components/SiteHeader.tsx) */}
       {/* ========================================================================= */}
-      <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-200 ${scrolled ? "glass-nav py-3" : "bg-transparent py-4"}`}>
-        <div className="bw-container flex items-center justify-between">
-          
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <span className="font-extrabold tracking-tight text-text-1 text-lg uppercase font-sans flex items-center gap-0.5">
-              PATH<span className="text-accent">FLOW</span>
-            </span>
-            <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-surface-2 text-text-2 border border-border">
-              v1.0
-            </span>
-          </Link>
-          
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-text-2">
-            <a href="#product" className="hover:text-text-1 transition-colors">Product</a>
-            <a href="#screenshots" className="hover:text-text-1 transition-colors">Screenshots</a>
-            <a href="#how-it-works" className="hover:text-text-1 transition-colors">How it works</a>
-            <a href="#capabilities" className="hover:text-text-1 transition-colors">Capabilities</a>
-            <a href="#why-pathflow" className="hover:text-text-1 transition-colors">Comparison</a>
-            <a href="#pricing" className="hover:text-text-1 transition-colors">Pricing</a>
-            <a href="https://github.com/anothercodingguy/pathflow#readme" target="_blank" rel="noopener noreferrer" className="hover:text-text-1 transition-colors">Docs</a>
-          </nav>
+      <SiteHeader appUrl={appUrl} />
 
-          {/* Desktop Actions */}
-          <div className="hidden md:flex items-center gap-4">
-            <a 
-              href="https://github.com/anothercodingguy/pathflow" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              aria-label="GitHub Repository" 
-              className="text-text-2 hover:text-text-1 transition-colors p-2 rounded-lg hover:bg-black/5"
-            >
-              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-              </svg>
-            </a>
-            <a 
-              href={appUrl} 
-              className="btn-primary py-2 px-3.5 text-xs font-semibold tracking-wide"
-            >
-              Open PathFlow <ArrowRight className="h-3.5 w-3.5 ml-0.5" />
-            </a>
-          </div>
-
-          {/* Mobile Menu Toggle Button */}
-          <button 
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
-            className="md:hidden p-2 rounded-lg text-text-1 hover:bg-black/5"
-            aria-label="Toggle navigation menu"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="md:hidden glass-nav border-t border-border px-4 py-6 mt-3 space-y-4">
-            <nav className="flex flex-col space-y-3 font-medium text-sm text-text-1">
-              <a 
-                href="#product" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1.5 hover:text-accent transition-colors"
-              >
-                Product
-              </a>
-              <a 
-                href="#screenshots" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1.5 hover:text-accent transition-colors"
-              >
-                Screenshots
-              </a>
-              <a 
-                href="#how-it-works" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1.5 hover:text-accent transition-colors"
-              >
-                How it works
-              </a>
-              <a 
-                href="#capabilities" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1.5 hover:text-accent transition-colors"
-              >
-                Capabilities
-              </a>
-              <a 
-                href="#why-pathflow" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1.5 hover:text-accent transition-colors"
-              >
-                Comparison
-              </a>
-              <a 
-                href="#pricing" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1.5 hover:text-accent transition-colors"
-              >
-                Pricing
-              </a>
-              <a 
-                href="https://github.com/anothercodingguy/pathflow#readme" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1.5 hover:text-accent transition-colors"
-              >
-                Documentation
-              </a>
-              <a 
-                href="https://github.com/anothercodingguy/pathflow" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="py-1.5 flex items-center justify-between text-text-2"
-              >
-                <span>GitHub Repository</span>
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            </nav>
-            <div className="pt-2 border-t border-border">
-              <a 
-                href={appUrl} 
-                className="btn-primary w-full py-2.5 text-sm"
-              >
-                Open PathFlow <ArrowRight className="h-4 w-4" />
-              </a>
-            </div>
-          </div>
-        )}
-      </header>
-
-      <main className="flex-1">
+      <main id="main" className="flex-1">
         
         {/* ========================================================================= */}
         {/* 2. HERO SECTION */}
@@ -322,12 +281,12 @@ export default function HomePage() {
 
             {/* Realistic Investigation Hero Window */}
             <div id="product" className="mt-14 w-full max-w-5xl text-left">
-              <div className="rounded-2xl border border-border bg-[#0C0C0F] text-white shadow-2xl overflow-hidden">
+              <div className="on-dark rounded-2xl border border-border bg-panel text-white shadow-2xl overflow-hidden">
                 
                 {/* Window Topbar */}
-                <div className="px-4 py-3 bg-[#141418] border-b border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+                <div className="px-4 py-3 bg-panel-3 border-b border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
                   <div className="flex items-center gap-2">
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1.5" aria-hidden="true">
                       <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
                       <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
                       <div className="w-3 h-3 rounded-full bg-[#28C840]" />
@@ -354,83 +313,82 @@ export default function HomePage() {
                 </div>
 
                 {/* Subheader: Incident Target */}
-                <div className="px-5 py-3.5 bg-[#101014] border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-4">
-                  <div>
+                <div className="px-4 sm:px-5 py-3.5 bg-panel-2 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-4">
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2 text-sm font-mono font-semibold text-zinc-200">
                       <span className="text-blue-400 font-bold">POST</span>
-                      <span>/api/checkout/process</span>
+                      <span className="[overflow-wrap:anywhere]">/api/checkout/process</span>
                     </div>
-                    <div className="text-xs text-red-400 font-mono mt-1">
+                    <div className="text-xs text-red-400 font-mono mt-1 [overflow-wrap:anywhere]">
                       TypeError: Cannot read properties of null (reading &apos;customer_id&apos;)
                     </div>
                   </div>
 
                   {/* Interactive Inspector Tabs */}
-                  <div className="flex bg-white/5 p-1 rounded-lg border border-white/10 text-xs font-mono">
-                    <button 
-                      onClick={() => setActiveHeroTab("trace")}
-                      className={`px-3 py-1 rounded transition-colors ${activeHeroTab === "trace" ? "bg-blue-600 text-white font-medium shadow-sm" : "text-zinc-400 hover:text-white"}`}
-                    >
-                      Execution Trace
-                    </button>
-                    <button 
-                      onClick={() => setActiveHeroTab("rootcause")}
-                      className={`px-3 py-1 rounded transition-colors ${activeHeroTab === "rootcause" ? "bg-blue-600 text-white font-medium shadow-sm" : "text-zinc-400 hover:text-white"}`}
-                    >
-                      Root Cause
-                    </button>
-                    <button 
-                      onClick={() => setActiveHeroTab("patch")}
-                      className={`px-3 py-1 rounded transition-colors ${activeHeroTab === "patch" ? "bg-blue-600 text-white font-medium shadow-sm" : "text-zinc-400 hover:text-white"}`}
-                    >
-                      Suggested Patch
-                    </button>
-                  </div>
+                  <TabList
+                    idBase="hero"
+                    label="Investigation views"
+                    tabs={HERO_TABS}
+                    value={activeHeroTab}
+                    onChange={setActiveHeroTab}
+                    className="grid w-full grid-cols-3 sm:flex sm:w-auto bg-white/5 p-1 rounded-lg border border-white/10 text-xs font-mono"
+                    tabClassName={(selected) =>
+                      `px-2 sm:px-3 py-1.5 sm:py-1 rounded leading-tight transition-colors ${selected ? "bg-accent text-white font-medium shadow-sm" : "text-zinc-400 hover:text-white"}`
+                    }
+                  />
                 </div>
 
                 {/* Tab Content 1: Execution Trace Waterfall */}
                 {activeHeroTab === "trace" && (
-                  <div className="p-5 space-y-3 font-mono text-xs">
-                    <div className="text-[11px] text-zinc-500 uppercase font-semibold tracking-wider flex items-center justify-between pb-1 border-b border-white/5">
+                  <div {...tabPanelProps("hero", "trace")} className="p-4 sm:p-5 space-y-3 font-mono text-xs focus-visible:-outline-offset-2">
+                    <div className="text-[11px] text-zinc-400 uppercase font-semibold tracking-wider flex items-center justify-between gap-3 pb-1 border-b border-white/5">
                       <span>Span Execution Hierarchy</span>
                       <span>Latency & Status</span>
                     </div>
 
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] border border-white/5 hover:border-white/10 transition-colors">
-                        <div className="flex items-center gap-2.5">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                          <span className="text-zinc-300 font-semibold">1. AuthMiddleware.verifySession</span>
-                          <span className="text-[10px] text-zinc-500 px-1.5 py-0.5 rounded bg-white/5">JWT Auth</span>
+                      <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-white/[0.03] border border-white/5 hover:border-white/10 transition-colors">
+                        <div className="flex min-w-0 items-start gap-2.5">
+                          <CheckCircle2 className="w-4 h-4 mt-0.5 text-emerald-400 shrink-0" />
+                          <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+                            <span className="text-zinc-300 font-semibold [overflow-wrap:anywhere]">1. AuthMiddleware.verifySession</span>
+                            <span className="text-[10px] text-zinc-400 px-1.5 py-0.5 rounded bg-white/5">JWT Auth</span>
+                          </div>
                         </div>
-                        <span className="text-zinc-400">18ms</span>
+                        <span className="shrink-0 text-zinc-400">18ms</span>
                       </div>
 
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] border border-white/5 hover:border-white/10 transition-colors ml-3">
-                        <div className="flex items-center gap-2.5">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                          <span className="text-zinc-300 font-semibold">2. CartService.calculateTotals</span>
-                          <span className="text-[10px] text-zinc-500 px-1.5 py-0.5 rounded bg-white/5">PostgreSQL</span>
+                      <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-white/[0.03] border border-white/5 hover:border-white/10 transition-colors ml-2 sm:ml-3">
+                        <div className="flex min-w-0 items-start gap-2.5">
+                          <CheckCircle2 className="w-4 h-4 mt-0.5 text-emerald-400 shrink-0" />
+                          <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+                            <span className="text-zinc-300 font-semibold [overflow-wrap:anywhere]">2. CartService.calculateTotals</span>
+                            <span className="text-[10px] text-zinc-400 px-1.5 py-0.5 rounded bg-white/5">PostgreSQL</span>
+                          </div>
                         </div>
-                        <span className="text-zinc-400">45ms</span>
+                        <span className="shrink-0 text-zinc-400">45ms</span>
                       </div>
 
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-red-500/10 border border-red-500/30 hover:border-red-500/50 transition-colors ml-6 shadow-sm">
-                        <div className="flex items-center gap-2.5">
-                          <XCircle className="w-4 h-4 text-red-400 shrink-0" />
-                          <span className="text-red-300 font-semibold">3. StripeCustomerLookup</span>
-                          <span className="text-[10px] text-red-400 px-1.5 py-0.5 rounded bg-red-500/20 font-bold">
-                            CRITICAL FAILURE
-                          </span>
+                      <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/30 hover:border-red-500/50 transition-colors ml-4 sm:ml-6 shadow-sm">
+                        <div className="flex min-w-0 items-start gap-2.5">
+                          <XCircle className="w-4 h-4 mt-0.5 text-red-400 shrink-0" />
+                          <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+                            <span className="text-red-300 font-semibold [overflow-wrap:anywhere]">3. StripeCustomerLookup</span>
+                            <span className="text-[10px] text-red-400 px-1.5 py-0.5 rounded bg-red-500/20 font-bold">
+                              CRITICAL FAILURE
+                            </span>
+                          </div>
                         </div>
-                        <span className="text-red-400 font-bold">184ms</span>
+                        <span className="shrink-0 text-red-400 font-bold">184ms</span>
                       </div>
 
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/5 text-zinc-600 ml-9">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-4 h-4 rounded-full border border-zinc-700 flex items-center justify-center text-[9px] text-zinc-600">4</div>
-                          <span className="line-through">4. PaymentIntent.create</span>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5">Skipped</span>
+                      <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/5 text-zinc-400 ml-6 sm:ml-9">
+                        <div className="flex min-w-0 items-start gap-2.5">
+                          <div aria-hidden="true" className="w-4 h-4 mt-0.5 shrink-0 rounded-full border border-zinc-700 flex items-center justify-center text-[9px] text-zinc-500">4</div>
+                          <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+                            <span className="line-through [overflow-wrap:anywhere]">4. PaymentIntent.create</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5">Skipped</span>
+                          </div>
                         </div>
                         <span>--</span>
                       </div>
@@ -440,9 +398,9 @@ export default function HomePage() {
 
                 {/* Tab Content 2: Root Cause Diagnosis */}
                 {activeHeroTab === "rootcause" && (
-                  <div className="p-5 space-y-4 font-sans text-xs">
+                  <div {...tabPanelProps("hero", "rootcause")} className="p-4 sm:p-5 space-y-4 font-sans text-xs focus-visible:-outline-offset-2">
                     <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 space-y-2">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2 text-blue-400 font-semibold font-mono uppercase text-xs">
                           <Zap className="w-4 h-4" /> Root Cause Identified
                         </div>
@@ -458,14 +416,17 @@ export default function HomePage() {
                     <div className="space-y-2">
                       <div className="text-xs font-mono uppercase text-zinc-400 font-semibold">Evidence Collected:</div>
                       <ul className="space-y-1.5 text-zinc-300 font-mono text-xs">
-                        <li className="flex items-center gap-2">
-                          <Check className="w-3.5 h-3.5 text-emerald-400" /> Correlated with commit <code className="text-zinc-400">a49f82d</code> (Add guest-checkout fast path)
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3.5 h-3.5 mt-0.5 shrink-0 text-emerald-400" />
+                          <span className="min-w-0 [overflow-wrap:anywhere]">Correlated with commit <code className="text-zinc-400">a49f82d</code> (Add guest-checkout fast path)</span>
                         </li>
-                        <li className="flex items-center gap-2">
-                          <Check className="w-3.5 h-3.5 text-emerald-400" /> Failure location isolated to <code className="text-blue-300">services/billing/stripe_handler.ts:42</code>
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3.5 h-3.5 mt-0.5 shrink-0 text-emerald-400" />
+                          <span className="min-w-0 [overflow-wrap:anywhere]">Failure location isolated to <code className="text-blue-300">services/billing/stripe_handler.ts:42</code></span>
                         </li>
-                        <li className="flex items-center gap-2">
-                          <Check className="w-3.5 h-3.5 text-emerald-400" /> Request payload contains <code className="text-zinc-400">isGuest: true</code> with missing foreign key
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3.5 h-3.5 mt-0.5 shrink-0 text-emerald-400" />
+                          <span className="min-w-0 [overflow-wrap:anywhere]">Request payload contains <code className="text-zinc-400">isGuest: true</code> with missing foreign key</span>
                         </li>
                       </ul>
                     </div>
@@ -474,12 +435,12 @@ export default function HomePage() {
 
                 {/* Tab Content 3: Suggested Patch */}
                 {activeHeroTab === "patch" && (
-                  <div className="p-5 font-mono text-xs space-y-3">
-                    <div className="flex items-center justify-between text-zinc-400 pb-1 border-b border-white/10">
+                  <div {...tabPanelProps("hero", "patch")} className="p-4 sm:p-5 font-mono text-xs space-y-3 focus-visible:-outline-offset-2">
+                    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-zinc-400 pb-1 border-b border-white/10">
                       <span>services/billing/stripe_handler.ts</span>
                       <span className="text-[11px] text-emerald-400 font-sans font-semibold">Ready to apply</span>
                     </div>
-                    <pre className="p-4 rounded-xl bg-black/40 border border-white/5 overflow-x-auto text-zinc-300 leading-relaxed">
+                    <pre tabIndex={0} aria-label="Example patch" className="p-4 rounded-xl bg-black/40 border border-white/5 overflow-x-auto text-zinc-300 leading-relaxed">
 {`@@ -41,3 +41,5 @@ export async function handlePayment(req) {
 -  const customerId = user.profile.customer_id;
 +  const customerId = user?.profile?.customer_id ?? await createGuestCustomer(user.email);
@@ -502,8 +463,8 @@ export default function HomePage() {
         {/* ========================================================================= */}
         {/* PRODUCTION PRODUCT SCREENSHOTS & WALKTHROUGH                              */}
         {/* ========================================================================= */}
-        <section id="screenshots" className="py-24 border-b border-border bg-[#07070A] text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="screenshots" className="on-dark py-24 border-b border-border bg-ink text-white">
+          <div className="bw-container">
             <div className="text-center max-w-3xl mx-auto mb-12">
 
               <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
@@ -514,138 +475,35 @@ export default function HomePage() {
               </p>
 
               {/* Interactive Screenshot Selector Tabs */}
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-xl bg-white/[0.04] border border-white/10 max-w-2xl mx-auto">
-                <button
-                  onClick={() => setActiveScreenshotTab("dashboard")}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
-                    activeScreenshotTab === "dashboard"
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+              <TabList
+                idBase="screenshots"
+                label="Product screenshots"
+                tabs={SCREENSHOTS}
+                value={activeScreenshotTab}
+                onChange={setActiveScreenshotTab}
+                className="mt-8 flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-xl bg-white/[0.04] border border-white/10 max-w-2xl mx-auto"
+                tabClassName={(selected) =>
+                  `px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-colors ${
+                    selected
+                      ? "bg-accent text-white shadow-md shadow-blue-500/20"
                       : "text-zinc-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  Runs Dashboard
-                </button>
-                <button
-                  onClick={() => setActiveScreenshotTab("trace")}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
-                    activeScreenshotTab === "trace"
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                      : "text-zinc-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  Trace Waterfall
-                </button>
-                <button
-                  onClick={() => setActiveScreenshotTab("failure")}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
-                    activeScreenshotTab === "failure"
-                      ? "bg-red-600 text-white shadow-md shadow-red-500/20"
-                      : "text-zinc-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  Incident Failure
-                </button>
-                <button
-                  onClick={() => setActiveScreenshotTab("investigation")}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
-                    activeScreenshotTab === "investigation"
-                      ? "bg-amber-600 text-white shadow-md shadow-amber-500/20"
-                      : "text-zinc-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  Root Cause
-                </button>
-                <button
-                  onClick={() => setActiveScreenshotTab("billing")}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
-                    activeScreenshotTab === "billing"
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-500/20"
-                      : "text-zinc-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  Billing & Plans
-                </button>
-                <button
-                  onClick={() => setActiveScreenshotTab("settings")}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
-                    activeScreenshotTab === "settings"
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                      : "text-zinc-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  SDK Setup
-                </button>
-              </div>
+                  }`
+                }
+              />
             </div>
 
             {/* Rendered Screenshot Item */}
-            <div className="max-w-5xl mx-auto">
-              {activeScreenshotTab === "dashboard" && (
-                <ProductScreenshot
-                  src="/screenshots/screenshot_dashboard.png"
-                  alt="PathFlow Production Runs Dashboard"
-                  title="Real-Time Execution Runs & Token Economics"
-                  caption="See every production execution in one place. Monitor status, model family, duration, token usage, and quality scores at a glance."
-                  badge="Runs Dashboard"
-                  urlPath="/app/runs"
-                  priority={true}
-                />
-              )}
-
-              {activeScreenshotTab === "trace" && (
-                <ProductScreenshot
-                  src="/screenshots/screenshot_trace.png"
-                  alt="PathFlow Interactive Trace Waterfall"
-                  title="Interactive Trace Waterfall & Span Hierarchy"
-                  caption="Follow the execution path step by step. Inspect child spans, tool invocations, prompts, token breakdowns, and latency bottlenecks."
-                  badge="Trace Waterfall"
-                  urlPath="/app/runs/path-1"
-                />
-              )}
-
-              {activeScreenshotTab === "failure" && (
-                <ProductScreenshot
-                  src="/screenshots/screenshot_failure.png"
-                  alt="PathFlow Production Incident Failure Diagnostics"
-                  title="Pinpoint Failure Points & Retry Loops"
-                  caption="See where things actually went wrong. Isolate 429 rate limits, bad tool schemas, and unclosed event loop leaks instantly."
-                  badge="Incident Diagnostics"
-                  urlPath="/app/runs/path-3"
-                />
-              )}
-
-              {activeScreenshotTab === "investigation" && (
-                <ProductScreenshot
-                  src="/screenshots/screenshot_investigation.png"
-                  alt="PathFlow Root Cause Diagnosis"
-                  title="Verifiable Root Cause Diagnosis with Evidence"
-                  caption="Isolate root causes with 87%+ confidence. PathFlow correlates spans, failure tags, and code diffs to output concrete code remediations."
-                  badge="Root Cause Diagnosis"
-                  urlPath="/app/runs/path-3?tab=investigation"
-                />
-              )}
-
-              {activeScreenshotTab === "billing" && (
-                <ProductScreenshot
-                  src="/screenshots/screenshot_billing.png"
-                  alt="PathFlow Subscription & Billing Management"
-                  title="Subscription & Plan Management"
-                  caption="Transparent monthly subscriptions in Indian Rupees (INR). Select Pro or Team tier and manage billing seamlessly."
-                  badge="Billing & Plans"
-                  urlPath="/app/settings/billing"
-                />
-              )}
-
-              {activeScreenshotTab === "settings" && (
-                <ProductScreenshot
-                  src="/screenshots/screenshot_settings.png"
-                  alt="PathFlow SDK Telemetry & Ingestion Settings"
-                  title="Zero-Friction Ingestion & API Keys"
-                  caption="Connect PathFlow to the way your team already works. Export PATHFLOW_API_KEY and wrap your agent in 2 lines of Python code."
-                  badge="SDK & Ingestion"
-                  urlPath="/app/settings"
-                />
-              )}
+            <div {...tabPanelProps("screenshots", currentScreenshot.value)} className="max-w-5xl mx-auto rounded-xl">
+              <ProductScreenshot
+                key={currentScreenshot.value}
+                src={currentScreenshot.src}
+                alt={currentScreenshot.alt}
+                title={currentScreenshot.title}
+                caption={currentScreenshot.caption}
+                badge={currentScreenshot.badge}
+                urlPath={currentScreenshot.urlPath}
+                priority={currentScreenshot.value === "dashboard"}
+              />
             </div>
           </div>
         </section>
@@ -658,35 +516,35 @@ export default function HomePage() {
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 max-w-4xl mx-auto text-left font-mono">
-              <div className="p-3.5 rounded-xl bg-white border border-border shadow-xs hover:border-text-3 transition-colors">
+              <div className="p-3.5 rounded-xl bg-surface border border-border shadow-xs hover:border-text-3 transition-colors">
                 <div className="text-xs font-bold text-text-1 flex items-center gap-1.5">
                   <Terminal className="w-3.5 h-3.5 text-accent" /> Runtime Logs
                 </div>
                 <div className="text-[11px] text-text-2 mt-1">Structured errors & console streams</div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white border border-border shadow-xs hover:border-text-3 transition-colors">
+              <div className="p-3.5 rounded-xl bg-surface border border-border shadow-xs hover:border-text-3 transition-colors">
                 <div className="text-xs font-bold text-text-1 flex items-center gap-1.5">
                   <Activity className="w-3.5 h-3.5 text-accent" /> Traces
                 </div>
                 <div className="text-[11px] text-text-2 mt-1">Waterfall spans & critical paths</div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white border border-border shadow-xs hover:border-text-3 transition-colors">
+              <div className="p-3.5 rounded-xl bg-surface border border-border shadow-xs hover:border-text-3 transition-colors">
                 <div className="text-xs font-bold text-text-1 flex items-center gap-1.5">
                   <FileCode className="w-3.5 h-3.5 text-accent" /> Code Context
                 </div>
                 <div className="text-[11px] text-text-2 mt-1">AST traversal & function scopes</div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white border border-border shadow-xs hover:border-text-3 transition-colors">
+              <div className="p-3.5 rounded-xl bg-surface border border-border shadow-xs hover:border-text-3 transition-colors">
                 <div className="text-xs font-bold text-text-1 flex items-center gap-1.5">
                   <GitCommit className="w-3.5 h-3.5 text-accent" /> Git Commits
                 </div>
                 <div className="text-[11px] text-text-2 mt-1">Recent diffs & code regressions</div>
               </div>
 
-              <div className="col-span-2 sm:col-span-1 p-3.5 rounded-xl bg-white border border-border shadow-xs hover:border-text-3 transition-colors">
+              <div className="col-span-2 sm:col-span-1 p-3.5 rounded-xl bg-surface border border-border shadow-xs hover:border-text-3 transition-colors">
                 <div className="text-xs font-bold text-text-1 flex items-center gap-1.5">
                   <Server className="w-3.5 h-3.5 text-accent" /> Deployments
                 </div>
@@ -756,7 +614,7 @@ export default function HomePage() {
               </div>
 
               {/* PathFlow unified solution */}
-              <div className="p-8 rounded-2xl bg-surface-2 border border-border space-y-6">
+              <div className="p-6 sm:p-8 rounded-2xl bg-surface-2 border border-border space-y-6">
                 <div className="w-10 h-10 rounded-xl bg-accent text-white flex items-center justify-center font-bold font-mono">
                   PF
                 </div>
@@ -769,11 +627,11 @@ export default function HomePage() {
                   </p>
                 </div>
 
-                <div className="pt-4 border-t border-border flex items-center justify-between text-xs font-mono text-text-2">
+                <div className="pt-4 border-t border-border flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs font-mono text-text-2">
                   <span>Zero guesswork</span>
-                  <span>•</span>
+                  <span aria-hidden="true">•</span>
                   <span>Evidence-backed</span>
-                  <span>•</span>
+                  <span aria-hidden="true">•</span>
                   <span>Direct to fix</span>
                 </div>
               </div>
@@ -797,10 +655,10 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               
               {/* Step 1 */}
-              <div className="p-5 rounded-2xl bg-white border border-border flex flex-col justify-between shadow-xs hover:-translate-y-1 transition-transform">
+              <li className="p-5 rounded-2xl bg-surface border border-border flex flex-col justify-between shadow-xs hover:-translate-y-1 transition-transform">
                 <div className="space-y-3">
                   <div className="text-xs font-mono text-error font-bold uppercase tracking-wider">
                     01 — Trigger
@@ -813,10 +671,10 @@ export default function HomePage() {
                 <div className="mt-6 pt-4 border-t border-border/50 text-[11px] font-mono text-text-3">
                   Ingress capture
                 </div>
-              </div>
+              </li>
 
               {/* Step 2 */}
-              <div className="p-5 rounded-2xl bg-white border border-border flex flex-col justify-between shadow-xs hover:-translate-y-1 transition-transform">
+              <li className="p-5 rounded-2xl bg-surface border border-border flex flex-col justify-between shadow-xs hover:-translate-y-1 transition-transform">
                 <div className="space-y-3">
                   <div className="text-xs font-mono text-accent font-bold uppercase tracking-wider">
                     02 — Investigate
@@ -829,12 +687,12 @@ export default function HomePage() {
                 <div className="mt-6 pt-4 border-t border-border/50 text-[11px] font-mono text-text-3">
                   Context correlation
                 </div>
-              </div>
+              </li>
 
               {/* Step 3 */}
-              <div className="p-5 rounded-2xl bg-white border border-border flex flex-col justify-between shadow-xs hover:-translate-y-1 transition-transform">
+              <li className="p-5 rounded-2xl bg-surface border border-border flex flex-col justify-between shadow-xs hover:-translate-y-1 transition-transform">
                 <div className="space-y-3">
-                  <div className="text-xs font-mono text-amber-600 font-bold uppercase tracking-wider">
+                  <div className="text-xs font-mono text-warning font-bold uppercase tracking-wider">
                     03 — Trace
                   </div>
                   <h3 className="text-base font-semibold text-text-1">Reconstructs execution path</h3>
@@ -845,12 +703,12 @@ export default function HomePage() {
                 <div className="mt-6 pt-4 border-t border-border/50 text-[11px] font-mono text-text-3">
                   Path reconstruction
                 </div>
-              </div>
+              </li>
 
               {/* Step 4 */}
-              <div className="p-5 rounded-2xl bg-white border border-border flex flex-col justify-between shadow-xs hover:-translate-y-1 transition-transform">
+              <li className="p-5 rounded-2xl bg-surface border border-border flex flex-col justify-between shadow-xs hover:-translate-y-1 transition-transform">
                 <div className="space-y-3">
-                  <div className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider">
+                  <div className="text-xs font-mono text-accent font-bold uppercase tracking-wider">
                     04 — Explain
                   </div>
                   <h3 className="text-base font-semibold text-text-1">Isolates root cause</h3>
@@ -861,10 +719,10 @@ export default function HomePage() {
                 <div className="mt-6 pt-4 border-t border-border/50 text-[11px] font-mono text-text-3">
                   Evidence reasoning
                 </div>
-              </div>
+              </li>
 
               {/* Step 5 */}
-              <div className="p-5 rounded-2xl bg-white border border-border flex flex-col justify-between shadow-xs hover:-translate-y-1 transition-transform">
+              <li className="sm:col-span-2 lg:col-span-1 p-5 rounded-2xl bg-surface border border-border flex flex-col justify-between shadow-xs hover:-translate-y-1 transition-transform">
                 <div className="space-y-3">
                   <div className="text-xs font-mono text-success font-bold uppercase tracking-wider">
                     05 — Fix
@@ -877,9 +735,9 @@ export default function HomePage() {
                 <div className="mt-6 pt-4 border-t border-border/50 text-[11px] font-mono text-text-3">
                   Actionable patch
                 </div>
-              </div>
+              </li>
 
-            </div>
+            </ol>
           </div>
         </section>
 
@@ -899,31 +757,38 @@ export default function HomePage() {
             </div>
 
             {/* Scenario Switcher Tabs */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {scenarios.map((sc, idx) => (
-                <button
-                  key={sc.id}
-                  onClick={() => {
-                    setActiveScenario(idx);
-                    setActiveDemoTab("timeline");
-                  }}
-                  className={`px-4 py-2.5 rounded-xl border text-xs font-mono transition-all ${activeScenario === idx ? "bg-black text-white border-black shadow-sm font-semibold" : "bg-white text-text-2 border-border hover:bg-surface-subtle"}`}
-                >
-                  <span className="mr-2 font-bold">{idx + 1}.</span>
-                  <span>{sc.title}</span>
-                </button>
-              ))}
-            </div>
+            <TabList
+              idBase="scenario"
+              label="Scenarios"
+              tabs={scenarios.map((sc, idx) => ({
+                value: sc.id,
+                label: (
+                  <>
+                    <span className="mr-2 font-bold">{idx + 1}.</span>
+                    <span>{sc.title}</span>
+                  </>
+                ),
+              }))}
+              value={currentScenario.id}
+              onChange={(id) => {
+                setActiveScenario(scenarios.findIndex((sc) => sc.id === id));
+                setActiveDemoTab("timeline");
+              }}
+              className="flex flex-wrap gap-2 mb-6"
+              tabClassName={(selected) =>
+                `px-4 py-2.5 rounded-xl border text-xs font-mono transition-colors ${selected ? "bg-black text-white border-black shadow-sm font-semibold" : "bg-surface text-text-2 border-border hover:bg-surface-subtle"}`
+              }
+            />
 
             {/* Interactive Shell */}
-            <div className="rounded-2xl border border-border bg-surface-2 p-4 sm:p-6 shadow-xl">
+            <div {...tabPanelProps("scenario", currentScenario.id)} className="rounded-2xl border border-border bg-surface-2 p-4 sm:p-6 shadow-xl">
               
               {/* Header */}
               <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-border">
-                <div>
-                  <div className="flex items-center gap-2 text-sm font-mono font-bold text-text-1">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-mono font-bold text-text-1">
                     <span className="px-2 py-0.5 rounded bg-black text-white text-xs">{currentScenario.method}</span>
-                    <span>{currentScenario.endpoint}</span>
+                    <span className="[overflow-wrap:anywhere]">{currentScenario.endpoint}</span>
                     <span className="text-xs text-error font-semibold">({currentScenario.status})</span>
                   </div>
                   <div className="text-xs text-text-2 mt-1">
@@ -932,62 +797,59 @@ export default function HomePage() {
                 </div>
 
                 <div className="flex items-center gap-3 text-xs font-mono">
-                  <span className="px-2.5 py-1 rounded-md bg-white border border-border text-text-2 flex items-center gap-1.5">
+                  <span className="px-2.5 py-1 rounded-md bg-surface border border-border text-text-2 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-text-3" /> {currentScenario.duration}
                   </span>
-                  <span className="px-2.5 py-1 rounded-md bg-white border border-border text-text-2 flex items-center gap-1.5">
+                  <span className="px-2.5 py-1 rounded-md bg-surface border border-border text-text-2 flex items-center gap-1.5">
                     <DollarSign className="w-3.5 h-3.5 text-text-3" /> {currentScenario.cost}
                   </span>
                 </div>
               </div>
 
               {/* Subtabs */}
-              <div className="flex gap-2 my-4">
-                <button
-                  onClick={() => setActiveDemoTab("timeline")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${activeDemoTab === "timeline" ? "bg-white text-text-1 border border-border font-bold shadow-xs" : "text-text-3 hover:text-text-1"}`}
-                >
-                  Span Waterfall ({currentScenario.spans.length} spans)
-                </button>
-                <button
-                  onClick={() => setActiveDemoTab("evidence")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${activeDemoTab === "evidence" ? "bg-white text-text-1 border border-border font-bold shadow-xs" : "text-text-3 hover:text-text-1"}`}
-                >
-                  Root Cause Diagnosis
-                </button>
-                <button
-                  onClick={() => setActiveDemoTab("fix")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${activeDemoTab === "fix" ? "bg-white text-text-1 border border-border font-bold shadow-xs" : "text-text-3 hover:text-text-1"}`}
-                >
-                  Verified Patch
-                </button>
-              </div>
+              <TabList
+                idBase="demo"
+                label="Scenario details"
+                tabs={[
+                  { value: "timeline", label: `Span Waterfall (${currentScenario.spans.length} spans)` },
+                  { value: "evidence", label: "Root Cause Diagnosis" },
+                  { value: "fix", label: "Verified Patch" },
+                ]}
+                value={activeDemoTab}
+                onChange={setActiveDemoTab}
+                className="flex flex-wrap gap-2 my-4"
+                tabClassName={(selected) =>
+                  `px-3 py-1.5 rounded-lg border text-xs font-mono transition-colors ${selected ? "bg-surface text-text-1 border-border font-bold shadow-xs" : "border-transparent text-text-2 hover:text-text-1"}`
+                }
+              />
 
               {/* Tab 1: Timeline */}
               {activeDemoTab === "timeline" && (
-                <div className="space-y-2.5 font-mono text-xs">
+                <div {...tabPanelProps("demo", "timeline")} className="space-y-2.5 font-mono text-xs rounded-xl">
                   {currentScenario.spans.map((sp, idx) => (
                     <div 
                       key={idx} 
-                      className={`p-3.5 rounded-xl border flex items-center justify-between ${sp.status === "error" ? "bg-red-500/10 border-red-500/30 text-red-900" : sp.status === "skipped" ? "bg-black/[0.02] border-border text-text-3 line-through" : "bg-white border-border text-text-1"}`}
+                      className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 ${sp.status === "error" ? "bg-red-500/10 border-red-500/30 text-red-900" : sp.status === "skipped" ? "bg-black/[0.02] border-border text-text-3 line-through" : "bg-surface border-border text-text-1"}`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex min-w-0 items-start gap-3">
                         {sp.status === "error" ? (
-                          <AlertTriangle className="w-4 h-4 text-error shrink-0" />
+                          <AlertTriangle className="w-4 h-4 mt-0.5 text-error shrink-0" />
                         ) : sp.status === "skipped" ? (
-                          <div className="w-4 h-4 rounded-full border border-border text-center text-[10px] text-text-3 leading-none flex items-center justify-center">∅</div>
+                          <div aria-hidden="true" className="w-4 h-4 mt-0.5 shrink-0 rounded-full border border-border-hover text-center text-[10px] text-text-3 leading-none flex items-center justify-center">∅</div>
                         ) : (
-                          <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 mt-0.5 text-success shrink-0" />
                         )}
-                        <span className="font-semibold">{sp.name}</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-black/5 text-text-3 font-normal">{sp.type}</span>
-                        {sp.error && (
-                          <span className="text-[10px] font-bold text-error px-1.5 py-0.5 rounded bg-error/10 uppercase">
-                            {sp.error}
-                          </span>
-                        )}
+                        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+                          <span className="font-semibold [overflow-wrap:anywhere]">{sp.name}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-black/5 text-text-2 font-normal">{sp.type}</span>
+                          {sp.error && (
+                            <span className="text-[10px] font-bold text-error px-1.5 py-0.5 rounded bg-error/10 uppercase">
+                              {sp.error}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <span className="font-semibold">{sp.duration}</span>
+                      <span className="shrink-0 font-semibold">{sp.duration}</span>
                     </div>
                   ))}
                 </div>
@@ -995,8 +857,8 @@ export default function HomePage() {
 
               {/* Tab 2: Root Cause */}
               {activeDemoTab === "evidence" && (
-                <div className="p-6 rounded-xl bg-white border border-border space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-border">
+                <div {...tabPanelProps("demo", "evidence")} className="p-4 sm:p-6 rounded-xl bg-surface border border-border space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-accent uppercase">
                       <Zap className="w-4 h-4" /> Root Cause Diagnosis
                     </div>
@@ -1012,11 +874,11 @@ export default function HomePage() {
                   <div className="grid sm:grid-cols-2 gap-3 pt-2 font-mono text-xs">
                     <div className="p-3 rounded-lg bg-surface-subtle border border-border">
                       <span className="text-text-3 block text-[10px] uppercase font-bold">Correlated Git Commit</span>
-                      <span className="text-text-1 font-semibold">{currentScenario.commit}</span>
+                      <span className="text-text-1 font-semibold [overflow-wrap:anywhere]">{currentScenario.commit}</span>
                     </div>
                     <div className="p-3 rounded-lg bg-surface-subtle border border-border">
                       <span className="text-text-3 block text-[10px] uppercase font-bold">Source Location</span>
-                      <span className="text-accent font-semibold">{currentScenario.file}</span>
+                      <span className="text-accent font-semibold [overflow-wrap:anywhere]">{currentScenario.file}</span>
                     </div>
                   </div>
                 </div>
@@ -1024,14 +886,14 @@ export default function HomePage() {
 
               {/* Tab 3: Fix */}
               {activeDemoTab === "fix" && (
-                <div className="space-y-3 font-mono text-xs">
-                  <div className="flex items-center justify-between text-text-2">
-                    <span>{currentScenario.file}</span>
+                <div {...tabPanelProps("demo", "fix")} className="space-y-3 font-mono text-xs rounded-xl">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-text-2">
+                    <span className="[overflow-wrap:anywhere]">{currentScenario.file}</span>
                     <span className="text-success font-semibold flex items-center gap-1">
                       <Check className="w-3.5 h-3.5" /> Patch generated from trace evidence
                     </span>
                   </div>
-                  <pre className="p-4 rounded-xl bg-white border border-border overflow-x-auto text-text-1 leading-relaxed">
+                  <pre tabIndex={0} aria-label="Example patch" className="p-4 rounded-xl bg-surface border border-border overflow-x-auto text-text-1 leading-relaxed">
                     {currentScenario.patchCode}
                   </pre>
                 </div>
@@ -1059,9 +921,9 @@ export default function HomePage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               
               {/* Card 1 */}
-              <div className="p-6 rounded-2xl bg-white border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
+              <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-accent-subtle text-accent flex items-center justify-center">
                     <Activity className="w-5 h-5" />
                   </div>
                   <h3 className="text-lg font-semibold text-text-1">Understand every execution</h3>
@@ -1075,9 +937,9 @@ export default function HomePage() {
               </div>
 
               {/* Card 2 */}
-              <div className="p-6 rounded-2xl bg-white border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
+              <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-accent-subtle text-accent flex items-center justify-center">
                     <Search className="w-5 h-5" />
                   </div>
                   <h3 className="text-lg font-semibold text-text-1">Investigate failures automatically</h3>
@@ -1091,9 +953,9 @@ export default function HomePage() {
               </div>
 
               {/* Card 3 */}
-              <div className="p-6 rounded-2xl bg-white border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
+              <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-accent-subtle text-accent flex items-center justify-center">
                     <Zap className="w-5 h-5" />
                   </div>
                   <h3 className="text-lg font-semibold text-text-1">Find the root cause</h3>
@@ -1107,9 +969,9 @@ export default function HomePage() {
               </div>
 
               {/* Card 4 */}
-              <div className="p-6 rounded-2xl bg-white border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
+              <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-accent-subtle text-accent flex items-center justify-center">
                     <GitCommit className="w-5 h-5" />
                   </div>
                   <h3 className="text-lg font-semibold text-text-1">Understand recent changes</h3>
@@ -1123,9 +985,9 @@ export default function HomePage() {
               </div>
 
               {/* Card 5 */}
-              <div className="p-6 rounded-2xl bg-white border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
+              <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-accent-subtle text-accent flex items-center justify-center">
                     <Split className="w-5 h-5" />
                   </div>
                   <h3 className="text-lg font-semibold text-text-1">Reconstruct failures step-by-step</h3>
@@ -1139,9 +1001,9 @@ export default function HomePage() {
               </div>
 
               {/* Card 6 */}
-              <div className="p-6 rounded-2xl bg-white border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
+              <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-accent-subtle text-accent flex items-center justify-center">
                     <FileCode className="w-5 h-5" />
                   </div>
                   <h3 className="text-lg font-semibold text-text-1">Get to a fix faster</h3>
@@ -1163,7 +1025,7 @@ export default function HomePage() {
         {/* ========================================================================= */}
         <section className="py-24 border-b border-border bg-surface">
           <div className="bw-container">
-            <div className="grid lg:grid-cols-[400px_1fr] gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-[400px_minmax(0,1fr)] gap-12 items-center">
               
               <div className="space-y-4">
 
@@ -1185,34 +1047,24 @@ export default function HomePage() {
               </div>
 
               {/* Code Snippet Box */}
-              <div className="rounded-2xl border border-border bg-[#0C0C0F] text-white p-5 shadow-xl font-mono text-xs space-y-4">
+              <div className="on-dark min-w-0 rounded-2xl border border-border bg-panel text-white p-4 sm:p-5 shadow-xl font-mono text-xs space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-white/10 text-zinc-400">
                   <span>app.py</span>
                   <button 
-                    onClick={() => handleCopyCode(`import pathflow\n\npathflow.init(\n    api_key="pf_live_secret_key",\n    endpoint="https://thepathflow.online/app/api/v1"\n)\n\n# Wrap any function or framework workflow\n@pathflow.trace()\ndef process_request(data):\n    return handle_business_logic(data)`)}
-                    className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    type="button"
+                    onClick={() => handleCopyCode(SDK_SNIPPET)}
+                    className="flex items-center gap-1.5 rounded text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   >
                     {copiedSdk ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedSdk ? "Copied" : "Copy"}</span>
+                    <span aria-live="polite">{copiedSdk ? "Copied" : "Copy"}</span>
                   </button>
                 </div>
 
-                <pre className="text-zinc-300 leading-relaxed overflow-x-auto">
-{`import pathflow
-
-# 1. Initialize PathFlow client
-pathflow.init(
-    api_key="pf_live_secret_key",
-    endpoint="https://thepathflow.online/app/api/v1"
-)
-
-# 2. Trace critical execution paths automatically
-@pathflow.trace()
-def process_checkout(user_id, cart):
-    return billing_service.charge(user_id, cart)`}
+                <pre tabIndex={0} aria-label="Python code sample" className="text-zinc-300 leading-relaxed overflow-x-auto rounded">
+{SDK_SNIPPET}
                 </pre>
 
-                <div className="pt-2 text-[11px] text-zinc-500 flex items-center justify-between">
+                <div className="pt-2 text-[11px] text-zinc-400 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                   <span>pip install pathflow</span>
                   <span className="text-emerald-400">Zero overhead runtime wrapper</span>
                 </div>
@@ -1238,38 +1090,38 @@ def process_checkout(user_id, cart):
             </div>
 
             {/* Comparison Table */}
-            <div className="max-w-4xl mx-auto rounded-2xl border border-border bg-white overflow-hidden shadow-xs">
-              <div className="grid grid-cols-2 text-xs font-mono font-bold uppercase tracking-wider border-b border-border bg-surface-2 p-4">
-                <span className="text-text-3">Traditional Observability</span>
-                <span className="text-accent flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5" /> PathFlow Debugger
+            <div role="table" aria-label="Traditional observability compared with PathFlow" className="max-w-4xl mx-auto rounded-2xl border border-border bg-surface overflow-hidden shadow-xs">
+              <div role="row" className="grid grid-cols-2 gap-4 text-xs font-mono font-bold uppercase tracking-wider border-b border-border bg-surface-subtle p-4">
+                <span role="columnheader" className="text-text-3">Traditional Observability</span>
+                <span role="columnheader" className="text-accent flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 shrink-0" /> PathFlow Debugger
                 </span>
               </div>
 
-              <div className="divide-y divide-border text-sm">
-                <div className="grid grid-cols-2 p-4 items-center">
-                  <span className="text-text-2 text-xs">Alert fires (PagerDuty / Slack)</span>
-                  <span className="font-semibold text-text-1 text-xs">Incident captured automatically with full stack state</span>
+              <div role="rowgroup" className="divide-y divide-border text-sm">
+                <div role="row" className="grid grid-cols-2 gap-4 p-4 items-center">
+                  <span role="cell" className="text-text-2 text-xs">Alert fires (PagerDuty / Slack)</span>
+                  <span role="cell" className="font-semibold text-text-1 text-xs">Incident captured automatically with full stack state</span>
                 </div>
-                <div className="grid grid-cols-2 p-4 items-center bg-surface-subtle/50">
-                  <span className="text-text-2 text-xs">Search through disconnected logs manually</span>
-                  <span className="font-semibold text-text-1 text-xs">Correlated execution path mapped from entry point</span>
+                <div role="row" className="grid grid-cols-2 gap-4 p-4 items-center bg-surface-subtle/50">
+                  <span role="cell" className="text-text-2 text-xs">Search through disconnected logs manually</span>
+                  <span role="cell" className="font-semibold text-text-1 text-xs">Correlated execution path mapped from entry point</span>
                 </div>
-                <div className="grid grid-cols-2 p-4 items-center">
-                  <span className="text-text-2 text-xs">Inspect raw distributed waterfall spans</span>
-                  <span className="font-semibold text-text-1 text-xs">Critical path & bottleneck highlighting</span>
+                <div role="row" className="grid grid-cols-2 gap-4 p-4 items-center">
+                  <span role="cell" className="text-text-2 text-xs">Inspect raw distributed waterfall spans</span>
+                  <span role="cell" className="font-semibold text-text-1 text-xs">Critical path & bottleneck highlighting</span>
                 </div>
-                <div className="grid grid-cols-2 p-4 items-center bg-surface-subtle/50">
-                  <span className="text-text-2 text-xs">Browse Git history to guess regressions</span>
-                  <span className="font-semibold text-text-1 text-xs">Direct commit & AST diff correlation</span>
+                <div role="row" className="grid grid-cols-2 gap-4 p-4 items-center bg-surface-subtle/50">
+                  <span role="cell" className="text-text-2 text-xs">Browse Git history to guess regressions</span>
+                  <span role="cell" className="font-semibold text-text-1 text-xs">Direct commit & AST diff correlation</span>
                 </div>
-                <div className="grid grid-cols-2 p-4 items-center">
-                  <span className="text-text-2 text-xs">Guess the cause under incident pressure</span>
-                  <span className="font-semibold text-text-1 text-xs">Evidence-backed root cause with confidence score</span>
+                <div role="row" className="grid grid-cols-2 gap-4 p-4 items-center">
+                  <span role="cell" className="text-text-2 text-xs">Guess the cause under incident pressure</span>
+                  <span role="cell" className="font-semibold text-text-1 text-xs">Evidence-backed root cause with confidence score</span>
                 </div>
-                <div className="grid grid-cols-2 p-4 items-center bg-surface-subtle/50">
-                  <span className="text-text-2 text-xs">Manual trial-and-error debugging</span>
-                  <span className="font-semibold text-accent text-xs">Move directly toward verified patch</span>
+                <div role="row" className="grid grid-cols-2 gap-4 p-4 items-center bg-surface-subtle/50">
+                  <span role="cell" className="text-text-2 text-xs">Manual trial-and-error debugging</span>
+                  <span role="cell" className="font-semibold text-accent text-xs">Move directly toward verified patch</span>
                 </div>
               </div>
             </div>
@@ -1346,7 +1198,7 @@ def process_checkout(user_id, cart):
         {/* PRICING (INR PRICING POWERED BY RAZORPAY)                                 */}
         {/* ========================================================================= */}
         <section id="pricing" className="py-24 border-b border-border bg-surface-subtle">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bw-container">
             <div className="text-center max-w-3xl mx-auto mb-16">
 
               <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-text-1">
@@ -1361,7 +1213,7 @@ def process_checkout(user_id, cart):
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
               
               {/* Free Plan */}
-              <div className="p-6 rounded-2xl bg-white border border-border flex flex-col justify-between shadow-xs">
+              <div className="p-6 rounded-2xl bg-surface border border-border flex flex-col justify-between shadow-xs">
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-lg font-bold text-text-1">{PLANS.FREE.name}</h3>
@@ -1373,22 +1225,22 @@ def process_checkout(user_id, cart):
                   </div>
                   <ul className="space-y-2.5 text-xs text-text-2 font-mono pt-2 border-t border-border">
                     {PLANS.FREE.features.map((f, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <Check className="w-3.5 h-3.5 text-success shrink-0" /> {f}
+                      <li key={i} className="flex items-start gap-2">
+                        <Check className="w-3.5 h-3.5 mt-0.5 text-success shrink-0" /> {f}
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div className="mt-8">
-                  <a href={appUrl + "/login"} className="btn-secondary w-full py-2.5 text-xs font-semibold text-center block">
+                  <a href={appUrl + "/login"} className="btn-secondary w-full py-2.5 text-xs font-semibold">
                     {PLANS.FREE.ctaText}
                   </a>
                 </div>
               </div>
 
               {/* Pro Plan (Featured) */}
-              <div className="p-6 rounded-2xl bg-black text-white border-2 border-blue-500 flex flex-col justify-between shadow-2xl relative">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-3 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider shadow-md">
+              <div className="on-dark p-6 rounded-2xl bg-black text-white border-2 border-accent flex flex-col justify-between shadow-2xl relative">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-accent text-white px-3 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider shadow-md">
                   Most Popular
                 </div>
                 <div className="space-y-4">
@@ -1402,8 +1254,8 @@ def process_checkout(user_id, cart):
                   </div>
                   <ul className="space-y-2.5 text-xs text-zinc-300 font-mono pt-2 border-t border-white/10">
                     {PLANS.PRO.features.map((f, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> {f}
+                      <li key={i} className="flex items-start gap-2">
+                        <Check className="w-3.5 h-3.5 mt-0.5 text-emerald-400 shrink-0" /> {f}
                       </li>
                     ))}
                   </ul>
@@ -1411,7 +1263,7 @@ def process_checkout(user_id, cart):
                 <div className="mt-8">
                   <a 
                     href={appUrl + "/login?callbackUrl=%2Fsettings%2Fbilling%3Fplan%3Dpro"} 
-                    className="btn-primary bg-blue-600 hover:bg-blue-500 text-white w-full py-2.5 text-xs font-semibold shadow-lg shadow-blue-500/20 text-center block"
+                    className="btn-primary bg-accent hover:bg-accent-hover w-full py-2.5 text-xs font-semibold shadow-lg shadow-blue-500/20"
                   >
                     {PLANS.PRO.ctaText}
                   </a>
@@ -1419,7 +1271,7 @@ def process_checkout(user_id, cart):
               </div>
 
               {/* Team Plan */}
-              <div className="p-6 rounded-2xl bg-white border border-border flex flex-col justify-between shadow-xs">
+              <div className="p-6 rounded-2xl bg-surface border border-border flex flex-col justify-between shadow-xs">
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-lg font-bold text-text-1">{PLANS.TEAM.name}</h3>
@@ -1431,8 +1283,8 @@ def process_checkout(user_id, cart):
                   </div>
                   <ul className="space-y-2.5 text-xs text-text-2 font-mono pt-2 border-t border-border">
                     {PLANS.TEAM.features.map((f, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <Check className="w-3.5 h-3.5 text-success shrink-0" /> {f}
+                      <li key={i} className="flex items-start gap-2">
+                        <Check className="w-3.5 h-3.5 mt-0.5 text-success shrink-0" /> {f}
                       </li>
                     ))}
                   </ul>
@@ -1440,7 +1292,7 @@ def process_checkout(user_id, cart):
                 <div className="mt-8">
                   <a 
                     href={appUrl + "/login?callbackUrl=%2Fsettings%2Fbilling%3Fplan%3Dteam"}
-                    className="btn-secondary w-full py-2.5 text-xs font-semibold text-center block hover:border-zinc-400 hover:text-text-1 transition-colors"
+                    className="btn-secondary w-full py-2.5 text-xs font-semibold"
                   >
                     {PLANS.TEAM.ctaText}
                   </a>
@@ -1448,7 +1300,7 @@ def process_checkout(user_id, cart):
               </div>
 
               {/* Enterprise Plan */}
-              <div className="p-6 rounded-2xl bg-white border border-border flex flex-col justify-between shadow-xs">
+              <div className="p-6 rounded-2xl bg-surface border border-border flex flex-col justify-between shadow-xs">
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-lg font-bold text-text-1">{PLANS.ENTERPRISE.name}</h3>
@@ -1460,8 +1312,8 @@ def process_checkout(user_id, cart):
                   </div>
                   <ul className="space-y-2.5 text-xs text-text-2 font-mono pt-2 border-t border-border">
                     {PLANS.ENTERPRISE.features.map((f, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <Check className="w-3.5 h-3.5 text-success shrink-0" /> {f}
+                      <li key={i} className="flex items-start gap-2">
+                        <Check className="w-3.5 h-3.5 mt-0.5 text-success shrink-0" /> {f}
                       </li>
                     ))}
                   </ul>
@@ -1469,7 +1321,7 @@ def process_checkout(user_id, cart):
                 <div className="mt-8">
                   <a 
                     href="mailto:enterprise@thepathflow.online?subject=PathFlow%20Enterprise%20Inquiry%20%E2%80%94%20Custom%20Volume%20%26%20VPC"
-                    className="btn-secondary w-full py-2.5 text-xs font-semibold text-center block hover:border-zinc-400 hover:text-text-1 transition-colors"
+                    className="btn-secondary w-full py-2.5 text-xs font-semibold"
                   >
                     Contact Enterprise →
                   </a>
@@ -1566,7 +1418,7 @@ def process_checkout(user_id, cart):
               <div className="font-mono text-[11px] font-bold uppercase text-text-1 tracking-wider">Contact</div>
               <ul className="space-y-2 text-text-2">
                 <li>
-                  <a href="mailto:support@thepathflow.online" className="hover:text-text-1 transition-colors">
+                  <a href="mailto:support@thepathflow.online" className="hover:text-text-1 transition-colors [overflow-wrap:anywhere]">
                     support@thepathflow.online
                   </a>
                 </li>
