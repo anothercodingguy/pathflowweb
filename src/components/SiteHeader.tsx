@@ -82,7 +82,7 @@ export default function SiteHeader({ appUrl }: { appUrl: string }) {
             PATH<span className="text-accent">FLOW</span>
           </span>
           <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-surface-2 text-text-2 border border-border">
-            v1.0
+            v0.1.0
           </span>
         </Link>
 

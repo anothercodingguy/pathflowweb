@@ -16,7 +16,6 @@ import {
   XCircle, 
   Terminal, 
   Activity, 
-  GitCommit, 
   Search, 
   Zap, 
   FileCode, 
@@ -86,7 +85,7 @@ const SCREENSHOTS: {
     src: "/screenshots/screenshot_investigation.png",
     alt: "PathFlow Root Cause Diagnosis",
     title: "Verifiable Root Cause Diagnosis with Evidence",
-    caption: "Isolate root causes with 87%+ confidence. PathFlow correlates spans, failure tags, and code diffs to output concrete code remediations.",
+    caption: "Each investigation lists what was observed, what was inferred, and a recommended next step, with a rule-based confidence score.",
     badge: "Root Cause Diagnosis",
     urlPath: "/app/runs/path-3?tab=investigation",
   },
@@ -114,18 +113,17 @@ const SCREENSHOTS: {
 
 // The code sample in the Integrations section. Shown on the page and copied by
 // the Copy button, so what you see is exactly what you get.
-const SDK_SNIPPET = `import pathflow
+const SDK_SNIPPET = `from pathflow import PathFlow
 
-# 1. Initialize PathFlow client
-pathflow.init(
-    api_key="pf_live_secret_key",
-    endpoint="https://thepathflow.online/app/api/v1"
-)
+# Reads PATHFLOW_API_KEY from your environment
+pf = PathFlow()
 
-# 2. Trace critical execution paths automatically
-@pathflow.trace()
+# Each call to this function is recorded as one run
+@pf.trace(name="Checkout", project="backend-service")
 def process_checkout(user_id, cart):
-    return billing_service.charge(user_id, cart)`;
+    with pf.span(name="Charge card", type="Tool") as span:
+        span.set_input({"user_id": user_id})
+        return billing_service.charge(user_id, cart)`;
 
 export default function HomePage() {
   const [activeHeroTab, setActiveHeroTab] = useState<HeroTab>("trace");
@@ -155,8 +153,7 @@ export default function HomePage() {
       cost: "$0.004",
       errorMsg: "TypeError: Cannot read properties of null (reading 'customer_id')",
       rootCause: "A recent migration altered the user profile payload, omitting customer_id during guest-checkout sessions. The payment worker expected customer_id unconditionally.",
-      confidence: 98,
-      commit: "a49f82d (Add guest-checkout fast path)",
+      confidence: 78,
       file: "services/billing/stripe_handler.ts:42",
       spans: [
         { name: "AuthMiddleware.verifySession", duration: "18ms", status: "ok", type: "MIDDLEWARE" },
@@ -182,8 +179,7 @@ export default function HomePage() {
       cost: "$0.042",
       errorMsg: "TimeoutError: Task was cancelled after 10000ms limit",
       rootCause: "Playwright browser worker spawned recursive event listeners inside a retry loop without cleanup, exhausting async event loop worker threads.",
-      confidence: 96,
-      commit: "f18b39c (Parallelize browser research agents)",
+      confidence: 85,
       file: "agents/research_agent.py:118",
       spans: [
         { name: "AgentContext.initialize", duration: "35ms", status: "ok", type: "INITIALIZE" },
@@ -210,8 +206,7 @@ export default function HomePage() {
       cost: "$0.015",
       errorMsg: "JSONDecodeError: Expecting property name enclosed in double quotes",
       rootCause: "GPT-4o output included markdown backticks surrounding JSON output, failing strict Pydantic schema validation in downstream triager.",
-      confidence: 99,
-      commit: "3b2901a (Update system prompt for ticket triaging)",
+      confidence: 78,
       file: "pipelines/triage_parser.py:54",
       spans: [
         { name: "IngestTicketPayload", duration: "12ms", status: "ok", type: "VALIDATE" },
@@ -307,7 +302,7 @@ export default function HomePage() {
                       <DollarSign className="w-3.5 h-3.5 text-zinc-500" /> $0.004
                     </span>
                     <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[11px] text-zinc-300">
-                      production (iad1)
+                      production
                     </span>
                   </div>
                 </div>
@@ -405,7 +400,7 @@ export default function HomePage() {
                           <Zap className="w-4 h-4" /> Root Cause Identified
                         </div>
                         <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[11px] font-mono font-bold">
-                          98% Confidence
+                          78% Confidence
                         </span>
                       </div>
                       <p className="text-zinc-200 text-sm leading-relaxed">
@@ -416,10 +411,6 @@ export default function HomePage() {
                     <div className="space-y-2">
                       <div className="text-xs font-mono uppercase text-zinc-400 font-semibold">Evidence Collected:</div>
                       <ul className="space-y-1.5 text-zinc-300 font-mono text-xs">
-                        <li className="flex items-start gap-2">
-                          <Check className="w-3.5 h-3.5 mt-0.5 shrink-0 text-emerald-400" />
-                          <span className="min-w-0 [overflow-wrap:anywhere]">Correlated with commit <code className="text-zinc-400">a49f82d</code> (Add guest-checkout fast path)</span>
-                        </li>
                         <li className="flex items-start gap-2">
                           <Check className="w-3.5 h-3.5 mt-0.5 shrink-0 text-emerald-400" />
                           <span className="min-w-0 [overflow-wrap:anywhere]">Failure location isolated to <code className="text-blue-300">services/billing/stripe_handler.ts:42</code></span>
@@ -451,6 +442,9 @@ export default function HomePage() {
                 )}
 
               </div>
+              <p className="mt-3 text-center text-xs font-mono text-text-3">
+                Illustrative example. Real captures are in the screenshots below.
+              </p>
             </div>
 
           </div>
@@ -518,9 +512,9 @@ export default function HomePage() {
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 max-w-4xl mx-auto text-left font-mono">
               <div className="p-3.5 rounded-xl bg-surface border border-border shadow-xs hover:border-text-3 transition-colors">
                 <div className="text-xs font-bold text-text-1 flex items-center gap-1.5">
-                  <Terminal className="w-3.5 h-3.5 text-accent" /> Runtime Logs
+                  <Terminal className="w-3.5 h-3.5 text-accent" /> Errors
                 </div>
-                <div className="text-[11px] text-text-2 mt-1">Structured errors & console streams</div>
+                <div className="text-[11px] text-text-2 mt-1">Exception messages on failed spans</div>
               </div>
 
               <div className="p-3.5 rounded-xl bg-surface border border-border shadow-xs hover:border-text-3 transition-colors">
@@ -532,23 +526,23 @@ export default function HomePage() {
 
               <div className="p-3.5 rounded-xl bg-surface border border-border shadow-xs hover:border-text-3 transition-colors">
                 <div className="text-xs font-bold text-text-1 flex items-center gap-1.5">
-                  <FileCode className="w-3.5 h-3.5 text-accent" /> Code Context
+                  <FileCode className="w-3.5 h-3.5 text-accent" /> Inputs & Outputs
                 </div>
-                <div className="text-[11px] text-text-2 mt-1">AST traversal & function scopes</div>
+                <div className="text-[11px] text-text-2 mt-1">Per span, known secret patterns redacted</div>
               </div>
 
               <div className="p-3.5 rounded-xl bg-surface border border-border shadow-xs hover:border-text-3 transition-colors">
                 <div className="text-xs font-bold text-text-1 flex items-center gap-1.5">
-                  <GitCommit className="w-3.5 h-3.5 text-accent" /> Git Commits
+                  <DollarSign className="w-3.5 h-3.5 text-accent" /> Tokens & Cost
                 </div>
-                <div className="text-[11px] text-text-2 mt-1">Recent diffs & code regressions</div>
+                <div className="text-[11px] text-text-2 mt-1">Token counts & spend per span</div>
               </div>
 
               <div className="col-span-2 sm:col-span-1 p-3.5 rounded-xl bg-surface border border-border shadow-xs hover:border-text-3 transition-colors">
                 <div className="text-xs font-bold text-text-1 flex items-center gap-1.5">
-                  <Server className="w-3.5 h-3.5 text-accent" /> Deployments
+                  <Server className="w-3.5 h-3.5 text-accent" /> Environments
                 </div>
-                <div className="text-[11px] text-text-2 mt-1">Release tags & runtime configs</div>
+                <div className="text-[11px] text-text-2 mt-1">Project & environment labels on every run</div>
               </div>
             </div>
           </div>
@@ -623,7 +617,7 @@ export default function HomePage() {
                     PathFlow connects that context into a single investigation.
                   </h3>
                   <p className="text-text-2 text-sm leading-relaxed">
-                    Instead of jumping between disconnected dashboards, PathFlow automatically correlates runtime telemetry, execution paths, and recent code changes to determine exactly why your system failed.
+                    Instead of jumping between disconnected dashboards, PathFlow puts a run&apos;s spans, errors, and detections in one investigation, so you can see where it failed.
                   </p>
                 </div>
 
@@ -681,7 +675,7 @@ export default function HomePage() {
                   </div>
                   <h3 className="text-base font-semibold text-text-1">Collects relevant context</h3>
                   <p className="text-xs text-text-2 leading-relaxed">
-                    Captures runtime stack frames, variable state, span latencies, and deployment metadata.
+                    Records each span&apos;s latency and any exception, plus the inputs, outputs, tokens, and cost you attach.
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-border/50 text-[11px] font-mono text-text-3">
@@ -752,14 +746,14 @@ export default function HomePage() {
                 See what happened, not just that it failed.
               </h2>
               <p className="mt-3 text-lg text-text-2">
-                Switch between real production scenarios to see how PathFlow diagnoses incidents.
+                Switch between three example scenarios to see how PathFlow lays out a failed run. The data shown is illustrative.
               </p>
             </div>
 
             {/* Scenario Switcher Tabs */}
             <TabList
               idBase="scenario"
-              label="Scenarios"
+              label="Example scenarios"
               tabs={scenarios.map((sc, idx) => ({
                 value: sc.id,
                 label: (
@@ -873,8 +867,8 @@ export default function HomePage() {
 
                   <div className="grid sm:grid-cols-2 gap-3 pt-2 font-mono text-xs">
                     <div className="p-3 rounded-lg bg-surface-subtle border border-border">
-                      <span className="text-text-3 block text-[10px] uppercase font-bold">Correlated Git Commit</span>
-                      <span className="text-text-1 font-semibold [overflow-wrap:anywhere]">{currentScenario.commit}</span>
+                      <span className="text-text-3 block text-[10px] uppercase font-bold">First Failing Span</span>
+                      <span className="text-text-1 font-semibold [overflow-wrap:anywhere]">{currentScenario.spans.find((sp) => sp.status === "error")?.name}</span>
                     </div>
                     <div className="p-3 rounded-lg bg-surface-subtle border border-border">
                       <span className="text-text-3 block text-[10px] uppercase font-bold">Source Location</span>
@@ -944,7 +938,7 @@ export default function HomePage() {
                   </div>
                   <h3 className="text-lg font-semibold text-text-1">Investigate failures automatically</h3>
                   <p className="text-sm text-text-2 leading-relaxed">
-                    Bring logs, traces, errors, stack frames, and runtime variable context together into a unified incident investigation without manual log writing.
+                    Bring a run&apos;s spans, errors, retries, and detections together into one investigation.
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-border/50 text-xs font-mono text-text-3">
@@ -972,15 +966,15 @@ export default function HomePage() {
               <div className="p-6 rounded-2xl bg-surface border border-border shadow-xs hover:-translate-y-1 transition-transform flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="w-10 h-10 rounded-xl bg-accent-subtle text-accent flex items-center justify-center">
-                    <GitCommit className="w-5 h-5" />
+                    <DollarSign className="w-5 h-5" />
                   </div>
-                  <h3 className="text-lg font-semibold text-text-1">Understand recent changes</h3>
+                  <h3 className="text-lg font-semibold text-text-1">Track tokens and cost</h3>
                   <p className="text-sm text-text-2 leading-relaxed">
-                    Connect runtime failures directly with recent Git commits, code migrations, and deployment revisions that introduced the regression.
+                    Every span can record its token count and cost, so you can see which step made a run slow or expensive.
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-border/50 text-xs font-mono text-text-3">
-                  Git & deployment diffing
+                  Per-span tokens & cost
                 </div>
               </div>
 
@@ -1033,14 +1027,11 @@ export default function HomePage() {
                   Works with the systems your team already runs.
                 </h2>
                 <p className="text-text-2 text-base leading-relaxed">
-                  Zero migration needed. PathFlow instruments your Python microservices, FastAPI backends, or agentic frameworks in 2 lines of code.
+                  No migration needed. The Python SDK wraps a function with one decorator. Other stacks can send runs through the REST API or OpenTelemetry.
                 </p>
 
                 <div className="flex flex-wrap gap-2 pt-2">
                   <span className="px-3 py-1 rounded-lg bg-surface-2 border border-border text-xs font-mono text-text-1">Python SDK</span>
-                  <span className="px-3 py-1 rounded-lg bg-surface-2 border border-border text-xs font-mono text-text-1">LangChain</span>
-                  <span className="px-3 py-1 rounded-lg bg-surface-2 border border-border text-xs font-mono text-text-1">CrewAI</span>
-                  <span className="px-3 py-1 rounded-lg bg-surface-2 border border-border text-xs font-mono text-text-1">AutoGen</span>
                   <span className="px-3 py-1 rounded-lg bg-surface-2 border border-border text-xs font-mono text-text-1">OpenTelemetry</span>
                   <span className="px-3 py-1 rounded-lg bg-surface-2 border border-border text-xs font-mono text-text-1">REST API</span>
                 </div>
@@ -1066,7 +1057,7 @@ export default function HomePage() {
 
                 <div className="pt-2 text-[11px] text-zinc-400 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                   <span>pip install pathflow</span>
-                  <span className="text-emerald-400">Zero overhead runtime wrapper</span>
+                  <span className="text-emerald-400">No dependencies · Python 3.9+</span>
                 </div>
               </div>
 
@@ -1101,7 +1092,7 @@ export default function HomePage() {
               <div role="rowgroup" className="divide-y divide-border text-sm">
                 <div role="row" className="grid grid-cols-2 gap-4 p-4 items-center">
                   <span role="cell" className="text-text-2 text-xs">Alert fires (PagerDuty / Slack)</span>
-                  <span role="cell" className="font-semibold text-text-1 text-xs">Incident captured automatically with full stack state</span>
+                  <span role="cell" className="font-semibold text-text-1 text-xs">Failed runs recorded with their spans and error messages</span>
                 </div>
                 <div role="row" className="grid grid-cols-2 gap-4 p-4 items-center bg-surface-subtle/50">
                   <span role="cell" className="text-text-2 text-xs">Search through disconnected logs manually</span>
@@ -1112,8 +1103,8 @@ export default function HomePage() {
                   <span role="cell" className="font-semibold text-text-1 text-xs">Critical path & bottleneck highlighting</span>
                 </div>
                 <div role="row" className="grid grid-cols-2 gap-4 p-4 items-center bg-surface-subtle/50">
-                  <span role="cell" className="text-text-2 text-xs">Browse Git history to guess regressions</span>
-                  <span role="cell" className="font-semibold text-text-1 text-xs">Direct commit & AST diff correlation</span>
+                  <span role="cell" className="text-text-2 text-xs">Compare a bad run with a good one by hand</span>
+                  <span role="cell" className="font-semibold text-text-1 text-xs">Side-by-side run comparison</span>
                 </div>
                 <div role="row" className="grid grid-cols-2 gap-4 p-4 items-center">
                   <span role="cell" className="text-text-2 text-xs">Guess the cause under incident pressure</span>
@@ -1182,7 +1173,7 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-base font-semibold text-text-1">Startup Teams</h3>
                 <p className="text-xs text-text-2 leading-relaxed">
-                  Slash incident MTTR so your small team can spend time building customer features rather than digging through log archives.
+                  See why a run failed without digging through log archives, so a small team can get back to building.
                 </p>
               </div>
 
@@ -1320,10 +1311,10 @@ export default function HomePage() {
                 </div>
                 <div className="mt-8">
                   <a 
-                    href="mailto:enterprise@thepathflow.online?subject=PathFlow%20Enterprise%20Inquiry%20%E2%80%94%20Custom%20Volume%20%26%20VPC"
+                    href={PLANS.ENTERPRISE.ctaHref}
                     className="btn-secondary w-full py-2.5 text-xs font-semibold"
                   >
-                    Contact Enterprise →
+                    {PLANS.ENTERPRISE.ctaText}
                   </a>
                 </div>
               </div>
@@ -1422,7 +1413,6 @@ export default function HomePage() {
                     support@thepathflow.online
                   </a>
                 </li>
-                <li className="text-text-3 font-mono text-[11px]">Deployments: iad1, bom1</li>
                 <li className="text-text-3 font-mono text-[11px]">Zero tracking cookies</li>
               </ul>
             </div>
